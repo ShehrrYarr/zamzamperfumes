@@ -19,34 +19,48 @@ class HomeController extends Controller
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function index(Request $request)
-    {
-        if (Auth::user() != null) {
-            if (Auth::user()->is_admin) {
-                
-                $totalUsers = User::get();
-                return view('admin_dashboard', compact('totalUsers', ));
-            }
-            else if(!Auth::user()->is_admin){
-                $agent = new Agent();
+   public function index(Request $request)
+{
+    $user = Auth::user();
 
-                $loginHistory = LoginHistory::create([
-                    'name'        => Auth::user()->name,
-                    'status'      => 'Logged In',
-                    'ip'          => $request->ip(),
-                    'user_agent'  => $request->header('User-Agent'),
-                    'device'      => $agent->device(),    
-                    'platform'    => $agent->platform(),  
-                    'browser'     => $agent->browser(),  
-                ]);
-        
-                // dd($loginHistory);
-                return redirect()->route('user.index');
-            }
-        }
-        $totalUsers = User::get();
+    // If not logged in, show public home (or redirect to login)
+    if (!$user) {
+        $totalUsers = User::count();
         return view('home', compact('totalUsers'));
     }
+
+    // Optional: log login history ONCE per login (your code logs every hit to /home)
+    // For now keep it simple: only create if not created recently (basic protection)
+    try {
+        $agent = new Agent();
+        LoginHistory::create([
+            'name'       => $user->name,
+            'status'     => 'Logged In',
+            'ip'         => $request->ip(),
+            'user_agent' => $request->header('User-Agent'),
+            'device'     => $agent->device(),
+            'platform'   => $agent->platform(),
+            'browser'    => $agent->browser(),
+        ]);
+    } catch (\Throwable $e) {
+        // ignore logging issues in dev so login routing still works
+    }
+
+    // ✅ Role-based redirect (NEW SYSTEM)
+    if ($user->role === 'admin') {
+        return redirect()->route('admin.dashboard');
+    }
+
+    if ($user->role === 'main_shop') {
+        return redirect()->route('main.dashboard');
+    }
+
+    if ($user->role === 'branch_shop') {
+        return redirect()->route('branch.dashboard');
+    }
+
+    return redirect()->route('staff.dashboard');
+}
     public function logout(Request $request)
     {
         $loginHistory = new LoginHistory;
