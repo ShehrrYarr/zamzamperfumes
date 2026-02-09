@@ -1,0 +1,46 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+class CreateUsersTable extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::create('users', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->string('email')->unique();
+            $table->timestamp('email_verified_at')->nullable();
+            $table->string('password');
+            $table->rememberToken();
+            $table->timestamps();
+            // $table->boolean('is_admin')->nullable();
+            $table->string('password_text')->nullable();
+            // $table->boolean('is_active')->default(true);
+ $table->enum('role', ['admin', 'main_shop', 'branch_shop', 'staff'])
+                  ->default('staff');
+
+                  $table->foreignId('shop_id')
+                  ->nullable()
+                  ->constrained('shops')
+                  ->nullOnDelete();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::dropIfExists('users');
+    }
+}
