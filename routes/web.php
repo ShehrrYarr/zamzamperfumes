@@ -29,6 +29,11 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 
+use App\Http\Controllers\Panels\AdminDashboardController;
+use App\Http\Controllers\Panels\MainDashboardController;
+use App\Http\Controllers\Panels\BranchDashboardController;
+use App\Http\Controllers\Panels\StaffDashboardController;
+
 
 Auth::routes();
 Route::post('/logout-user/{user}', [UserController::class, 'logoutUser'])->name('logoutUser');
@@ -59,22 +64,22 @@ Route::get('/index', [App\Http\Controllers\UserController::class, 'index'])
     ->middleware(['auth', 'login.time.restrict']);
 
 
-    
+
 
 Route::middleware(['auth', 'role:admin'])->group(function () {
-    Route::get('/admin/dashboard', fn() => 'Admin Dashboard')->name('admin.dashboard');
+    Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
 });
 
 Route::middleware(['auth', 'role:main_shop'])->group(function () {
-    Route::get('/main/dashboard', fn() => 'Main Shop Dashboard')->name('main.dashboard');
+    Route::get('/main/dashboard', [MainDashboardController::class, 'index'])->name('main.dashboard');
 });
 
 Route::middleware(['auth', 'role:branch_shop'])->group(function () {
-    Route::get('/branch/dashboard', fn() => 'Branch Dashboard')->name('branch.dashboard');
+    Route::get('/branch/dashboard', [BranchDashboardController::class, 'index'])->name('branch.dashboard');
 });
 
 Route::middleware(['auth', 'role:staff'])->group(function () {
-    Route::get('/staff/dashboard', fn() => 'Staff Dashboard')->name('staff.dashboard');
+    Route::get('/staff/dashboard', [StaffDashboardController::class, 'index'])->name('staff.dashboard');
 });
 
 
