@@ -32,6 +32,14 @@
             <a class="btn" href="{{ route('main.returns.index') }}">See Returns</a>
         </div>
     </div>
+    <div class="col-4 card">
+        <h1 class="h1">Quick</h1>
+        <p class="muted">Actions</p>
+        <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
+            <a class="nav-link {{ request()->routeIs('shop.qr') ? 'active' : '' }}" href="{{ route('shop.qr') }}">Attendance QR</a>
+           
+        </div>
+    </div>
     
 </div>
 @endsection

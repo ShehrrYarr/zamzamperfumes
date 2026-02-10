@@ -348,11 +348,13 @@ Route::middleware(['auth'])->group(function () {
 });
 
 
-Route::get('/branch/qr', function () {
-    $shop = \App\Models\Shop::findOrFail(auth()->user()->shop_id);
-    abort_if(auth()->user()->role !== 'branch_shop', 403);
-    return view('panels.branch.qr', compact('shop'));
-})->name('branch.qr');
+Route::middleware(['auth'])->get('/shop/qr', function () {
+    $user = auth()->user();
+    abort_if(!in_array($user->role, ['main_shop','branch_shop'], true), 403);
+
+    $shop = \App\Models\Shop::findOrFail($user->shop_id);
+    return view('panels.shop.qr', compact('shop'));
+})->name('shop.qr');
 
 
 Route::middleware(['auth'])->group(function () {

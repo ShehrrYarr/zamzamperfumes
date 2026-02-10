@@ -31,20 +31,6 @@ class HomeController extends Controller
 
     // Optional: log login history ONCE per login (your code logs every hit to /home)
     // For now keep it simple: only create if not created recently (basic protection)
-    try {
-        $agent = new Agent();
-        LoginHistory::create([
-            'name'       => $user->name,
-            'status'     => 'Logged In',
-            'ip'         => $request->ip(),
-            'user_agent' => $request->header('User-Agent'),
-            'device'     => $agent->device(),
-            'platform'   => $agent->platform(),
-            'browser'    => $agent->browser(),
-        ]);
-    } catch (\Throwable $e) {
-        // ignore logging issues in dev so login routing still works
-    }
 
     // ✅ Role-based redirect (NEW SYSTEM)
     if ($user->role === 'admin') {
@@ -63,10 +49,7 @@ class HomeController extends Controller
 }
     public function logout(Request $request)
     {
-        $loginHistory = new LoginHistory;
-                $loginHistory->name = Auth::user()->name;
-                $loginHistory->status = "Logged Out";
-                $loginHistory->save();
+        
         Auth::logout();
         $request->session()->invalidate();
         return redirect('/');

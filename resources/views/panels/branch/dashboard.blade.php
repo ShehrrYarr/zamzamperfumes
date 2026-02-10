@@ -37,9 +37,7 @@
         <p class="muted">Actions</p>
         <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
             <a class="btn" href="{{ route('branch.returns.index') }}">See Returns</a>
-            <a class="nav-link {{ request()->routeIs('branch.qr') ? 'active' : '' }}" href="{{ route('branch.qr') }}">
-                Attendance QR
-            </a>
+           <a class="nav-link {{ request()->routeIs('shop.qr') ? 'active' : '' }}" href="{{ route('shop.qr') }}">Attendance QR</a>
             
         </div>
     </div>
