@@ -19,5 +19,13 @@
             <a class="btn" href="{{ route('admin.reports.returns') }}">Returns Report</a>
         </div>
     </div>
+    <div class="col-4 card">
+        <h1 class="h1">Quick</h1>
+        <p class="muted">Actions</p>
+        <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
+            <a class="nav-link {{ request()->routeIs('admin.reports.salaries') ? 'active' : '' }}"
+                href="{{ route('admin.reports.salaries') }}">Salary Report</a>
+        </div>
+    </div>
 </div>
 @endsection

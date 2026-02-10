@@ -56,6 +56,7 @@ use App\Http\Controllers\Branch\BankController as BranchBankController;
 use App\Http\Controllers\Admin\AdminReportsController;
 use App\Http\Controllers\Staff\AttendanceScanController;
 use App\Http\Controllers\Staff\StaffAttendanceController;
+use App\Http\Controllers\Reports\SalaryReportController;
 
 Auth::routes();
 Route::post('/logout-user/{user}', [UserController::class, 'logoutUser'])->name('logoutUser');
@@ -364,7 +365,20 @@ Route::middleware(['auth'])->group(function () {
 
 
 
+Route::middleware(['auth'])->group(function () {
 
+    // Admin (all shops)
+    Route::get('/admin/reports/salaries', [SalaryReportController::class, 'admin'])
+        ->name('admin.reports.salaries');
+
+    // Main shop (own staff)
+    Route::get('/main/reports/salaries', [SalaryReportController::class, 'main'])
+        ->name('main.reports.salaries');
+
+    // Branch shop (own staff)
+    Route::get('/branch/reports/salaries', [SalaryReportController::class, 'branch'])
+        ->name('branch.reports.salaries');
+});
 
 
 

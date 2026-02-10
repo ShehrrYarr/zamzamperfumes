@@ -38,6 +38,8 @@
         <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
             <a class="btn" href="{{ route('branch.returns.index') }}">See Returns</a>
            <a class="nav-link {{ request()->routeIs('shop.qr') ? 'active' : '' }}" href="{{ route('shop.qr') }}">Attendance QR</a>
+           <a class="nav-link {{ request()->routeIs('branch.reports.salaries') ? 'active' : '' }}"
+            href="{{ route('branch.reports.salaries') }}">Salary Report</a>
             
         </div>
     </div>
