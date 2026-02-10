@@ -53,6 +53,7 @@ use App\Http\Controllers\POS\BranchPosController;
 use App\Http\Controllers\POS\PosApiController;
 use App\Http\Controllers\MainShop\BankController as MainBankController;
 use App\Http\Controllers\Branch\BankController as BranchBankController;
+use App\Http\Controllers\Admin\AdminReportsController;
 
 
 Auth::routes();
@@ -293,6 +294,52 @@ Route::get('/main/pos/return-receipt/{sale}', [\App\Http\Controllers\POS\ReturnR
 
 Route::get('/branch/pos/return-receipt/{sale}', [\App\Http\Controllers\POS\ReturnReceiptController::class, 'show'])
   ->name('branch.pos.return_receipt');
+
+
+
+  // main
+Route::get('/main/pos/sale/{sale}', [\App\Http\Controllers\POS\PartialReturnController::class,'sale'])
+  ->name('main.pos.sale');
+Route::post('/main/pos/return-partial', [\App\Http\Controllers\POS\PartialReturnController::class,'process'])
+  ->name('main.pos.return_partial');
+
+// branch
+Route::get('/branch/pos/sale/{sale}', [\App\Http\Controllers\POS\PartialReturnController::class,'sale'])
+  ->name('branch.pos.sale');
+Route::post('/branch/pos/return-partial', [\App\Http\Controllers\POS\PartialReturnController::class,'process'])
+  ->name('branch.pos.return_partial');
+
+
+
+
+Route::get('/main/returns', [\App\Http\Controllers\ReturnsController::class, 'mainIndex'])
+  ->name('main.returns.index');
+
+
+  Route::get('/branch/returns', [\App\Http\Controllers\ReturnsController::class, 'branchIndex'])
+  ->name('branch.returns.index');
+
+
+
+
+
+
+Route::middleware(['auth'])->group(function () {
+
+    Route::middleware(['role:admin'])->prefix('admin')->name('admin.')->group(function () {
+
+        Route::get('/reports/batches', [AdminReportsController::class, 'batches'])
+            ->name('reports.batches');
+
+        Route::get('/reports/sales', [AdminReportsController::class, 'sales'])
+            ->name('reports.sales');
+
+        Route::get('/reports/returns', [AdminReportsController::class, 'returns'])
+            ->name('reports.returns');
+    });
+
+});
+
 
 
 

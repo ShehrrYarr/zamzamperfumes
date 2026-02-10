@@ -13,13 +13,15 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="{{ asset('assets/panel.css') }}">
+    
 </head>
 
 <body>
     <div class="app" data-sidebar="open">
         <aside class="sidebar" id="sidebar">
+            <div class="sidebar-overlay" id="sidebarOverlay"></div>
             <div class="brand">
-                <div class="logo">JF</div>
+                <div class="logo">ZZP</div>
                 <div class="brand-text">
                     <div class="brand-title">Zam Zam Perfume</div>
                     <div class="brand-sub">@yield('panel_name', 'Panel')</div>
@@ -124,7 +126,7 @@
 
                 <div class="topbar-right">
                     <div class="pill">Shop: {{ auth()->user()->shop_id ?? '—' }}</div>
-                    <div class="pill">Role: {{ auth()->user()->role }}</div>
+                    <div class="pill">Role: {{ auth()->user()->role ?? '-' }}</div>
                 </div>
             </header>
 

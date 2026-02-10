@@ -29,7 +29,9 @@
         <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
             <a class="btn" href="{{ route('main.branches.index') }}">View Branches</a>
             <a class="btn" href="{{ route('main.pos') }}">Open POS</a>
+            <a class="btn" href="{{ route('main.returns.index') }}">See Returns</a>
         </div>
     </div>
+    
 </div>
 @endsection

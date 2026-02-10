@@ -17,6 +17,7 @@
             --accent: #22c55e;
             --accent2: #38bdf8;
             --danger: #ef4444;
+            --warn: #f59e0b;
             --radius: 18px;
             --shadow: 0 25px 60px rgba(0, 0, 0, .55);
 
@@ -25,6 +26,10 @@
             --todayBg2: #07131f;
             --todayBorder: rgba(56, 189, 248, .20);
             --todayGlow: 0 25px 60px rgba(56, 189, 248, .12);
+
+            /* Modal */
+            --modalBg: rgba(2, 6, 23, .72);
+            --panelBg: rgba(255, 255, 255, .06);
         }
 
         * {
@@ -61,6 +66,22 @@
                 opacity: 1;
                 transform: none
             }
+        }
+
+        @keyframes pop {
+            from {
+                opacity: 0;
+                transform: scale(.98) translateY(8px)
+            }
+
+            to {
+                opacity: 1;
+                transform: none
+            }
+        }
+
+        .pop {
+            animation: pop .22s ease-out both
         }
 
         .topbar {
@@ -104,6 +125,7 @@
             font-weight: 800;
             cursor: pointer;
             transition: .2s ease;
+            user-select: none;
         }
 
         .btn:hover {
@@ -137,6 +159,12 @@
         .btn-danger {
             background: linear-gradient(135deg, #fb7185, #ef4444);
             color: #3f0a0a;
+            border: none;
+        }
+
+        .btn-warn {
+            background: linear-gradient(135deg, #fde68a, #f59e0b);
+            color: #3b2401;
             border: none;
         }
 
@@ -405,6 +433,104 @@
             display: none;
         }
 
+        /* Modal */
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(2, 6, 23, .78);
+            backdrop-filter: blur(8px);
+            display: none;
+            z-index: 1000;
+        }
+
+        .modal.show {
+            display: flex
+        }
+
+        .modal-inner {
+            width: min(980px, calc(100% - 26px));
+            margin: auto;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, .14);
+            background:
+                radial-gradient(900px 360px at 20% 0%, rgba(251, 191, 36, .18), transparent),
+                radial-gradient(800px 300px at 100% 0%, rgba(239, 68, 68, .12), transparent),
+                linear-gradient(180deg, rgba(255, 255, 255, .08), rgba(255, 255, 255, .03));
+            box-shadow: 0 40px 120px rgba(0, 0, 0, .7);
+            overflow: hidden;
+        }
+
+        .modal-h {
+            padding: 14px 18px;
+            border-bottom: 1px solid rgba(255, 255, 255, .12);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-h .h {
+            font-weight: 900
+        }
+
+        .modal-b {
+            padding: 18px
+        }
+
+        .modal-close {
+            border: 1px solid rgba(255, 255, 255, .14);
+            background: rgba(2, 6, 23, .35);
+            color: var(--text);
+            border-radius: 12px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-weight: 900;
+        }
+
+        .modal-close:hover {
+            transform: translateY(-1px)
+        }
+
+        .modal-kpi {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        @media(max-width:860px) {
+            .modal-kpi {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .pill {
+            display: inline-flex;
+            gap: 8px;
+            align-items: center;
+            padding: 8px 12px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, .14);
+            background: rgba(2, 6, 23, .35);
+            font-size: 12px;
+            font-weight: 800;
+            color: rgba(226, 232, 240, .9);
+        }
+
+        .pill span {
+            color: rgba(148, 163, 184, .95);
+            font-weight: 800
+        }
+
+        .helper {
+            border: 1px solid rgba(251, 191, 36, .24);
+            background: rgba(251, 191, 36, .10);
+            border-radius: 14px;
+            padding: 10px 12px;
+            color: rgba(255, 255, 255, .92);
+            font-size: 12px;
+        }
+
         @media(max-width:980px) {
             .grid {
                 grid-template-columns: 1fr
@@ -505,6 +631,7 @@
 
                         <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px;">
                             <button id="checkoutBtn" class="btn btn-accent" type="button">Complete Sale</button>
+                            <button id="openReturnBtn" class="btn btn-warn" type="button">Return / Refund</button>
                         </div>
 
                         {{-- Payment + Discount UI --}}
@@ -512,14 +639,9 @@
                             <div>
                                 <div class="small" style="margin-bottom:6px;">Payment Method</div>
                                 <div class="radio-row">
-                                    <label>
-                                        <input type="radio" name="pay_method" value="counter" checked>
-                                        Counter
-                                    </label>
-                                    <label>
-                                        <input type="radio" name="pay_method" value="bank">
-                                        Bank
-                                    </label>
+                                    <label><input type="radio" name="pay_method" value="counter" checked>
+                                        Counter</label>
+                                    <label><input type="radio" name="pay_method" value="bank"> Bank</label>
                                 </div>
 
                                 <div id="bankBox" style="margin-top:10px; display:none;">
@@ -544,8 +666,7 @@
                                     <input id="discountValue" class="input" style="min-width:auto; width:100%;"
                                         type="number" min="0" step="0.01" value="0" placeholder="0">
                                 </div>
-                                <div class="small" style="margin-top:6px;">
-                                    Flat = amount off. Percent = % off subtotal.
+                                <div class="small" style="margin-top:6px;">Flat = amount off. Percent = % off subtotal.
                                 </div>
                             </div>
                         </div>
@@ -594,19 +715,6 @@
                             <div class="row grand">
                                 <span class="small">Grand Total</span>
                                 <strong id="cartGrand">0.00</strong>
-                            </div>
-                        </div>
-
-                        {{-- RETURNS --}}
-                        <hr class="sep">
-                        <div style="margin-top:10px;">
-                            <div class="small" style="margin-bottom:6px;">Return (by Sale ID)</div>
-                            <div style="display:flex; gap:10px; flex-wrap:wrap;">
-                                <input id="returnSaleId" class="input" style="min-width:auto; width:180px;"
-                                    placeholder="Sale ID">
-                                <button id="returnBtn" class="btn btn-danger" type="button">Process Return</button>
-                            </div>
-                            <div class="small" style="margin-top:6px;">Enter receipt sale ID to process full return.
                             </div>
                         </div>
 
@@ -672,6 +780,104 @@
         </div>
     </div>
 
+    {{-- PARTIAL RETURN MODAL --}}
+    <div id="returnModal" class="modal" role="dialog" aria-modal="true" aria-hidden="true">
+        <div class="modal-inner pop">
+            <div class="modal-h">
+                <div>
+                    <div class="h">Return / Refund (Partial)</div>
+                    <div class="small">Enter Sale ID → select quantities to return → process refund</div>
+                </div>
+                <button id="closeReturnModal" class="modal-close" type="button">✕</button>
+            </div>
+
+            <div class="modal-b">
+                <div class="helper" style="margin-bottom:12px;">
+                    Tip: You can only return up to the <b>returnable quantity</b> (sold − already returned).
+                </div>
+
+                <div class="controls" style="margin-bottom:12px;">
+                    <input id="returnSaleIdInput" class="input" style="min-width:auto; width:220px;"
+                        placeholder="Sale ID (e.g. 123)">
+                    <button id="fetchSaleBtn" class="btn btn-warn" type="button">Fetch Sale</button>
+                    <span id="returnStatus" class="small"></span>
+                </div>
+
+                <div id="saleMeta" style="display:none;">
+                    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px;">
+                        <span class="pill"><span>Sale</span> <b id="metaSaleId">—</b></span>
+                        <span class="pill"><span>Date</span> <b id="metaDate">—</b></span>
+                        <span class="pill"><span>Customer</span> <b id="metaCustomer">—</b></span>
+                        <span class="pill"><span>Total</span> <b id="metaTotal">—</b></span>
+                    </div>
+
+                    <div class="form-grid" style="margin-bottom:12px;">
+                        <div>
+                            <div class="small" style="margin-bottom:6px;">Refund Method</div>
+                            <div class="radio-row">
+                                <label><input type="radio" name="refund_method" value="counter" checked> Counter</label>
+                                <label><input type="radio" name="refund_method" value="bank"> Bank</label>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="small" style="margin-bottom:6px;">Bank (if bank refund)</div>
+                            <select id="refundBankSelect" class="select" style="width:100%;">
+                                <option value="">Select bank</option>
+                            </select>
+                            <div class="small" style="margin-top:6px;">Uses same banks list.</div>
+                        </div>
+                    </div>
+
+                    <div class="table-wrap" style="margin-bottom:12px;">
+                        <table style="min-width:820px;">
+                            <thead>
+                                <tr>
+                                    <th>Item</th>
+                                    <th>Barcode</th>
+                                    <th>Sold</th>
+                                    <th>Returned</th>
+                                    <th>Returnable</th>
+                                    <th>Unit</th>
+                                    <th>Return Qty</th>
+                                    <th class="right">Line Refund</th>
+                                </tr>
+                            </thead>
+                            <tbody id="returnItemsBody">
+                                <tr>
+                                    <td colspan="8" class="small">Fetch a sale first.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="modal-kpi">
+                        <div class="totals" style="border-color:rgba(251,191,36,.25);">
+                            <div class="row">
+                                <span class="small">Selected Refund</span>
+                                <strong id="refundTotal">0.00</strong>
+                            </div>
+                            <div class="row grand">
+                                <span class="small">Items Selected</span>
+                                <strong id="refundLines">0</strong>
+                            </div>
+                        </div>
+
+                        <div class="helper">
+                            <b>Note:</b> Partial returns do not delete the sale. We record a return entry and a negative
+                            payment.
+                        </div>
+
+                        <div style="display:flex; justify-content:flex-end; align-items:center; gap:10px;">
+                            <button id="processPartialReturnBtn" class="btn btn-danger" type="button">Process
+                                Refund</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         (function(){
   const mode = @json($mode); // 'main' or 'branch'
@@ -685,7 +891,10 @@
     banks: mode === 'main' ? @json(route('main.pos.banks')) : @json(route('branch.pos.banks')),
     checkout: mode === 'main' ? @json(route('main.pos.checkout')) : @json(route('branch.pos.checkout')),
     today: mode === 'main' ? @json(route('main.pos.today')) : @json(route('branch.pos.today')),
-    posReturn: mode === 'main' ? @json(route('main.pos.return')) : @json(route('branch.pos.return')),
+
+    // partial return endpoints
+    sale: mode === 'main' ? @json(route('main.pos.sale', ['sale' => 0])) : @json(route('branch.pos.sale', ['sale' => 0])),
+    return_partial: mode === 'main' ? @json(route('main.pos.return_partial')) : @json(route('branch.pos.return_partial')),
   };
 
   const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
@@ -708,11 +917,9 @@
   const bankSelect = document.getElementById('bankSelect');
 
   const checkoutBtn = document.getElementById('checkoutBtn');
+  const openReturnBtn = document.getElementById('openReturnBtn');
   const customerNameEl = document.getElementById('customerName');
   const customerPhoneEl = document.getElementById('customerPhone');
-
-  const returnSaleIdEl = document.getElementById('returnSaleId');
-  const returnBtn = document.getElementById('returnBtn');
 
   const todayCountEl = document.getElementById('todayCount');
   const todayGrandEl = document.getElementById('todayGrand');
@@ -721,7 +928,28 @@
   const todayBody = document.getElementById('todayBody');
   const refreshTodayBtn = document.getElementById('refreshTodayBtn');
 
+  // Modal elements
+  const returnModal = document.getElementById('returnModal');
+  const closeReturnModal = document.getElementById('closeReturnModal');
+  const returnSaleIdInput = document.getElementById('returnSaleIdInput');
+  const fetchSaleBtn = document.getElementById('fetchSaleBtn');
+  const returnStatus = document.getElementById('returnStatus');
+
+  const saleMeta = document.getElementById('saleMeta');
+  const metaSaleId = document.getElementById('metaSaleId');
+  const metaDate = document.getElementById('metaDate');
+  const metaCustomer = document.getElementById('metaCustomer');
+  const metaTotal = document.getElementById('metaTotal');
+
+  const refundBankSelect = document.getElementById('refundBankSelect');
+  const returnItemsBody = document.getElementById('returnItemsBody');
+  const refundTotalEl = document.getElementById('refundTotal');
+  const refundLinesEl = document.getElementById('refundLines');
+  const processPartialReturnBtn = document.getElementById('processPartialReturnBtn');
+
   let cartState = [];
+  let banksCache = [];
+  let currentReturnSale = null; // {sale, items[]}
 
   function showToast(msg, type='info'){
     toast.style.display = 'block';
@@ -751,14 +979,18 @@
       },
       body: JSON.stringify(body)
     });
+
+    // keep laravel validation message readable
+    const contentType = res.headers.get('content-type') || '';
     if(!res.ok){
-      let msg = 'Request failed';
-      try{
-        const t = await res.text();
-        msg = t || msg;
-      }catch(e){}
-      throw new Error(msg);
+      if(contentType.includes('application/json')){
+        const j = await res.json();
+        throw new Error(j.message || 'Request failed');
+      }
+      const t = await res.text();
+      throw new Error(t || ('HTTP '+res.status));
     }
+
     return res.json();
   }
 
@@ -800,9 +1032,7 @@
         <td>${it.perfume}${it.brand ? `<div class="small">${it.brand}</div>` : ''}</td>
         <td>${it.qty}</td>
         <td>${it.sell_price === null ? '<span class="small">—</span>' : money(it.sell_price)}</td>
-        <td class="right">
-          <button class="btn btn-accent" data-add="${it.batch_id}">Add</button>
-        </td>
+        <td class="right"><button class="btn btn-accent" data-add="${it.batch_id}">Add</button></td>
       </tr>
     `).join('');
 
@@ -844,9 +1074,7 @@
                    type="number" min="1" max="${c.available}" value="${c.qty}" data-qty="${c.batch_id}">
           </td>
           <td class="right"><b>${money(line)}</b><div class="small">${money(c.price)} each</div></td>
-          <td class="right">
-            <button class="btn btn-danger" data-remove="${c.batch_id}">Remove</button>
-          </td>
+          <td class="right"><button class="btn btn-danger" data-remove="${c.batch_id}">Remove</button></td>
         </tr>
       `;
     }).join('');
@@ -949,16 +1177,23 @@
   async function loadBanks(){
     try{
       const data = await httpGet(routes.banks);
-      const banks = data.banks || [];
-      if(banks.length === 0){
+      banksCache = data.banks || [];
+
+      if(banksCache.length === 0){
         bankSelect.innerHTML = `<option value="">No banks found (add from Banks page)</option>`;
+        refundBankSelect.innerHTML = `<option value="">No banks found</option>`;
         return;
       }
-      bankSelect.innerHTML = `<option value="">Select bank</option>` + banks.map(b =>
+
+      const opts = `<option value="">Select bank</option>` + banksCache.map(b =>
         `<option value="${b.id}">${b.name}${b.account_number ? ' — ' + b.account_number : ''}</option>`
       ).join('');
+
+      bankSelect.innerHTML = opts;
+      refundBankSelect.innerHTML = opts;
     }catch(e){
       bankSelect.innerHTML = `<option value="">Failed to load banks</option>`;
+      refundBankSelect.innerHTML = `<option value="">Failed to load banks</option>`;
     }
   }
 
@@ -1025,10 +1260,7 @@
 
       if(res.ok){
         showToast('Sale completed ✅');
-
-        if(res.receipt_url){
-          window.open(res.receipt_url, '_blank');
-        }
+        if(res.receipt_url){ window.open(res.receipt_url, '_blank'); }
 
         cartState = [];
         renderCart([]);
@@ -1051,46 +1283,267 @@
     }
   });
 
-  // Return
-  returnBtn.addEventListener('click', async () => {
-    const saleId = Number((returnSaleIdEl.value || '').trim());
-    if(!saleId){
-      showToast('Enter a valid Sale ID', 'error');
+  /* -----------------------
+     Partial Return Modal
+  ------------------------ */
+
+  function openModal(){
+    returnStatus.textContent = '';
+    saleMeta.style.display = 'none';
+    returnItemsBody.innerHTML = `<tr><td colspan="8" class="small">Fetch a sale first.</td></tr>`;
+    refundTotalEl.textContent = '0.00';
+    refundLinesEl.textContent = '0';
+    currentReturnSale = null;
+
+    returnModal.classList.add('show');
+    returnModal.setAttribute('aria-hidden','false');
+    setTimeout(()=> returnSaleIdInput.focus(), 60);
+  }
+
+  function closeModal(){
+    returnModal.classList.remove('show');
+    returnModal.setAttribute('aria-hidden','true');
+    barcodeInput.focus();
+  }
+
+  openReturnBtn.addEventListener('click', openModal);
+  closeReturnModal.addEventListener('click', closeModal);
+
+  // click outside modal to close
+  returnModal.addEventListener('click', (e) => {
+    if(e.target === returnModal) closeModal();
+  });
+
+  // ESC to close
+  document.addEventListener('keydown', (e) => {
+    if(e.key === 'Escape' && returnModal.classList.contains('show')) closeModal();
+  });
+
+  function getRefundMethod(){
+    return document.querySelector('input[name="refund_method"]:checked')?.value || 'counter';
+  }
+
+  function computeRefundFromUI(){
+    let total = 0;
+    let lines = 0;
+
+    const inputs = returnItemsBody.querySelectorAll('input[data-sale-item]');
+    inputs.forEach(inp => {
+      const qty = Number(inp.value || 0);
+      const unit = Number(inp.getAttribute('data-unit') || 0);
+      if(qty > 0){
+        lines++;
+        total += (qty * unit);
+      }
+      const lineCell = document.getElementById('lineRefund_' + inp.getAttribute('data-sale-item'));
+      if(lineCell){
+        lineCell.textContent = money(qty * unit);
+      }
+    });
+
+    refundTotalEl.textContent = money(total);
+    refundLinesEl.textContent = String(lines);
+    return { total, lines };
+  }
+
+  function renderReturnItems(items){
+    if(!items || items.length === 0){
+      returnItemsBody.innerHTML = `<tr><td colspan="8" class="small">No items on this sale.</td></tr>`;
       return;
     }
 
-    if(!confirm('Process full return for Sale #' + saleId + '?')){
+    returnItemsBody.innerHTML = items.map(it => {
+      const disabled = it.returnable_qty <= 0 ? 'disabled' : '';
+      const max = it.returnable_qty;
+      return `
+        <tr>
+          <td>
+            <b>${it.name}</b>
+            <div class="small">SaleItem #${it.sale_item_id}</div>
+          </td>
+          <td>${it.barcode}</td>
+          <td>${it.sold_qty}</td>
+          <td>${it.returned_qty}</td>
+          <td><b>${it.returnable_qty}</b></td>
+          <td>${money(it.unit_price)}</td>
+          <td style="width:140px;">
+            <input class="input" style="min-width:auto; width:110px; padding:10px 10px;"
+              type="number" min="0" max="${max}" value="0"
+              ${disabled}
+              data-sale-item="${it.sale_item_id}"
+              data-batch="${it.batch_id}"
+              data-unit="${it.unit_price}">
+          </td>
+          <td class="right"><b id="lineRefund_${it.sale_item_id}">0.00</b></td>
+        </tr>
+      `;
+    }).join('');
+
+    // Listen changes
+    returnItemsBody.querySelectorAll('input[data-sale-item]').forEach(inp => {
+      inp.addEventListener('input', () => {
+        let v = Number(inp.value || 0);
+        const max = Number(inp.getAttribute('max') || 0);
+        if(v < 0) v = 0;
+        if(v > max) v = max;
+        inp.value = String(v);
+        computeRefundFromUI();
+      });
+    });
+
+    computeRefundFromUI();
+  }
+
+  function fillSaleMeta(sale){
+    saleMeta.style.display = 'block';
+    metaSaleId.textContent = '#' + sale.id;
+    metaDate.textContent = sale.created_at || '—';
+    metaCustomer.textContent = sale.customer || 'Walk-in';
+    metaTotal.textContent = money(sale.total || 0);
+  }
+
+  async function fetchSale(){
+    const id = Number((returnSaleIdInput.value || '').trim());
+    if(!id){
+      returnStatus.textContent = 'Enter a valid Sale ID.';
+      returnStatus.style.color = 'rgba(251,191,36,.95)';
       return;
     }
 
     try{
-      returnBtn.disabled = true;
-      returnBtn.textContent = 'Processing…';
+      returnStatus.textContent = 'Fetching…';
+      returnStatus.style.color = 'rgba(148,163,184,.95)';
 
-      const res = await httpPost(routes.posReturn, { sale_id: saleId });
+      const url = routes.sale.replace(/0$/, String(id));
+      const data = await httpGet(url);
+
+      if(!data.ok){
+        returnStatus.textContent = data.message || 'Cannot fetch sale.';
+        returnStatus.style.color = 'rgba(239,68,68,.95)';
+        return;
+      }
+
+      currentReturnSale = data;
+
+      fillSaleMeta(data.sale);
+      renderReturnItems(data.items);
+
+      // Prefer original payment method for refund, but allow change
+      const pm = data.sale.payment_method || 'counter';
+      document.querySelectorAll('input[name="refund_method"]').forEach(r => {
+        r.checked = (r.value === pm);
+      });
+
+      if(pm === 'bank' && data.sale.bank_id){
+        refundBankSelect.value = String(data.sale.bank_id);
+      } else {
+        refundBankSelect.value = '';
+      }
+
+      returnStatus.textContent = 'Sale loaded ✅';
+      returnStatus.style.color = 'rgba(34,197,94,.95)';
+    }catch(e){
+      returnStatus.textContent = 'Fetch failed: ' + e.message;
+      returnStatus.style.color = 'rgba(239,68,68,.95)';
+      saleMeta.style.display = 'none';
+      currentReturnSale = null;
+    }
+  }
+
+  fetchSaleBtn.addEventListener('click', fetchSale);
+  returnSaleIdInput.addEventListener('keydown', (e) => {
+    if(e.key === 'Enter'){ e.preventDefault(); fetchSale(); }
+  });
+
+  // process partial return
+  processPartialReturnBtn.addEventListener('click', async () => {
+    if(!currentReturnSale || !currentReturnSale.sale){
+      returnStatus.textContent = 'Fetch a sale first.';
+      returnStatus.style.color = 'rgba(251,191,36,.95)';
+      return;
+    }
+
+    const { total, lines } = computeRefundFromUI();
+    if(lines === 0 || total <= 0){
+      returnStatus.textContent = 'Select at least one item qty to return.';
+      returnStatus.style.color = 'rgba(251,191,36,.95)';
+      return;
+    }
+
+    const method = getRefundMethod();
+    const bankId = refundBankSelect.value;
+
+    if(method === 'bank' && !bankId){
+      returnStatus.textContent = 'Please select a bank for bank refund.';
+      returnStatus.style.color = 'rgba(251,191,36,.95)';
+      return;
+    }
+
+    if(!confirm(`Process refund of ${money(total)} for Sale #${currentReturnSale.sale.id}?`)){
+      return;
+    }
+
+    // build items payload
+    const items = [];
+    returnItemsBody.querySelectorAll('input[data-sale-item]').forEach(inp => {
+      const qty = Number(inp.value || 0);
+      if(qty > 0){
+        items.push({
+          sale_item_id: Number(inp.getAttribute('data-sale-item')),
+          qty: qty
+        });
+      }
+    });
+
+    try{
+      processPartialReturnBtn.disabled = true;
+      processPartialReturnBtn.textContent = 'Processing…';
+
+      const res = await httpPost(routes.return_partial, {
+        sale_id: Number(currentReturnSale.sale.id),
+        method: method,
+        bank_id: method === 'bank' ? Number(bankId) : null,
+        items: items
+      });
 
       if(res.ok){
-        showToast('Return processed ✅');
-        if(res.return_receipt_url){
-          window.open(res.return_receipt_url, '_blank');
-        }
-        returnSaleIdEl.value = '';
+        returnStatus.textContent = 'Refund processed ✅';
+        returnStatus.style.color = 'rgba(34,197,94,.95)';
+
+        // Refresh today sales
         await loadTodaySales();
+
+        // Re-fetch sale to update returnable qty immediately
+        await fetchSale();
+
+        // Optional: close modal after success
+        // closeModal();
+        showToast('Partial return processed ✅');
       }else{
-        showToast(res.message || 'Return failed', 'error');
+        returnStatus.textContent = res.message || 'Refund failed.';
+        returnStatus.style.color = 'rgba(239,68,68,.95)';
       }
     }catch(e){
-      showToast('Return failed: ' + e.message, 'error');
+      returnStatus.textContent = 'Refund failed: ' + e.message;
+      returnStatus.style.color = 'rgba(239,68,68,.95)';
     }finally{
-      returnBtn.disabled = false;
-      returnBtn.textContent = 'Process Return';
+      processPartialReturnBtn.disabled = false;
+      processPartialReturnBtn.textContent = 'Process Refund';
     }
   });
 
-  // initial
-  loadCart();
+  /* -----------------------
+     Init
+  ------------------------ */
+
+  // Load banks into both selects
   loadBanks();
+
+  // Load cart and today
+  loadCart();
   loadTodaySales();
+
+  // focus barcode by default
   barcodeInput.focus();
 })();
     </script>

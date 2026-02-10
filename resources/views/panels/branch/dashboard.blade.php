@@ -32,5 +32,13 @@
             <a class="btn" href="{{ route('branch.pos') }}">Open POS</a>
         </div>
     </div>
+    <div class="col-4 card">
+        <h1 class="h1">Quick</h1>
+        <p class="muted">Actions</p>
+        <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
+            <a class="btn" href="{{ route('branch.returns.index') }}">See Returns</a>
+            
+        </div>
+    </div>
 </div>
 @endsection
