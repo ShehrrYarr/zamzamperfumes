@@ -14,7 +14,16 @@
 
     <div style="margin-top:16px; display:flex; gap:16px; flex-wrap:wrap; align-items:center;">
         <div class="card" style="padding:18px; max-width:360px;">
-            {!! QrCode::size(280)->generate(route('staff.scan', $shop->qr_token)) !!}
+            @php
+            $slot = (int) floor(now()->timestamp / 300); // 300 sec = 5 minutes
+            $sig = hash_hmac('sha256', $shop->qr_token.'|'.$slot, config('app.key'));
+            $url = route('staff.scan', ['token' => $shop->qr_token]) . '?slot='.$slot.'&sig='.$sig;
+            @endphp
+            
+            {!! QrCode::size(280)->generate($url) !!}
+            <div class="muted" style="margin-top:10px; font-size:12px; word-break:break-all;">
+                {{ $url }}
+            </div>
             <div class="muted" style="margin-top:10px; font-size:12px; word-break:break-all;">
                 {{ route('staff.scan', $shop->qr_token) }}
             </div>
@@ -38,4 +47,8 @@
         </div>
     </div>
 </div>
+<script>
+    // refresh slightly after 5 minutes to ensure next slot
+  setTimeout(() => location.reload(), 305000);
+</script>
 @endsection
