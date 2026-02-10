@@ -22,7 +22,8 @@ class CreateBatchesTable extends Migration
             $table->foreignId('shop_id')->constrained('shops')->cascadeOnDelete();
 
             // barcode must be unique globally (because you want same barcode to move to branch)
-            $table->string('barcode')->unique();
+            $table->string('barcode');
+            $table->unique(['shop_id', 'barcode']);
 
             $table->string('batch_no')->nullable(); // supplier batch number (optional)
 

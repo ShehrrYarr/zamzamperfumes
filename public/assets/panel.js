@@ -15,3 +15,21 @@
     localStorage.setItem('sidebar_state', next);
   });
 })();
+
+
+window.openBatchPrint = function (baseUrl) {
+  const w = prompt("Sticker width (in inches)? e.g. 2", "2");
+  if (w === null) return;
+
+  const h = prompt("Sticker height (in inches)? e.g. 1", "1");
+  if (h === null) return;
+
+  const width = parseFloat(w);
+  const height = parseFloat(h);
+
+  if (!isFinite(width) || width <= 0) { alert("Invalid width"); return; }
+  if (!isFinite(height) || height <= 0) { alert("Invalid height"); return; }
+
+  const url = baseUrl + "?w=" + encodeURIComponent(width) + "&h=" + encodeURIComponent(height);
+  window.open(url, "_blank", "noopener,noreferrer");
+};

@@ -41,7 +41,13 @@ use App\Http\Controllers\Branch\StaffController;
 use App\Http\Controllers\MainShop\BranchesController as MainShopBranchesController;
 use App\Http\Controllers\Admin\PerfumeController as AdminPerfumeController;
 use App\Http\Controllers\MainShop\PerfumeController as MainPerfumeController;
-
+use App\Http\Controllers\Admin\BatchController as AdminBatchController;
+use App\Http\Controllers\MainShop\BatchController as MainBatchController;
+use App\Http\Controllers\MainShop\TransferController as MainTransferController;
+use App\Http\Controllers\Branch\TransferClaimController;
+use App\Http\Controllers\Branch\InventoryController;
+use App\Http\Controllers\MainShop\InventoryController as MainInventoryController;
+use App\Http\Controllers\Branch\TransferHistoryController;
 
 Auth::routes();
 Route::post('/logout-user/{user}', [UserController::class, 'logoutUser'])->name('logoutUser');
@@ -155,6 +161,47 @@ Route::put('/main/perfumes/{perfume}', [MainPerfumeController::class, 'update'])
 
 
 
+Route::get('/admin/batches', [AdminBatchController::class, 'index'])->name('admin.batches.index');
+Route::get('/admin/batches/create', [AdminBatchController::class, 'create'])->name('admin.batches.create');
+Route::post('/admin/batches', [AdminBatchController::class, 'store'])->name('admin.batches.store');
+Route::get('/admin/batches/{batch}/print', [AdminBatchController::class, 'print'])->name('admin.batches.print');
+
+
+
+
+Route::get('/main/batches', [MainBatchController::class, 'index'])->name('main.batches.index');
+Route::get('/main/batches/create', [MainBatchController::class, 'create'])->name('main.batches.create');
+Route::post('/main/batches', [MainBatchController::class, 'store'])->name('main.batches.store');
+Route::get('/main/batches/{batch}/print', [MainBatchController::class, 'print'])->name('main.batches.print');
+
+
+
+Route::get('/main/transfers', [MainTransferController::class, 'index'])->name('main.transfers.index');
+Route::get('/main/transfers/create', [MainTransferController::class, 'create'])->name('main.transfers.create');
+Route::post('/main/transfers', [MainTransferController::class, 'store'])->name('main.transfers.store');
+
+
+
+
+Route::get('/branch/transfers/claim', [TransferClaimController::class, 'showClaimForm'])->name('branch.transfers.claim_form');
+Route::post('/branch/transfers/claim', [TransferClaimController::class, 'claim'])->name('branch.transfers.claim');
+
+
+Route::get('/branch/inventory', [InventoryController::class, 'index'])->name('branch.inventory.index');
+Route::get('/branch/batches/{batch}/print', [InventoryController::class, 'print'])->name('branch.batches.print');
+
+
+
+Route::get('/main/inventory', [MainInventoryController::class, 'index'])->name('main.inventory.index');
+
+
+
+Route::post('/main/transfers/{transfer}/cancel', [MainTransferController::class, 'cancel'])
+    ->name('main.transfers.cancel');
+
+
+
+Route::get('/branch/transfers', [TransferHistoryController::class, 'index'])->name('branch.transfers.index');
 
 
 

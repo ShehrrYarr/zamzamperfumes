@@ -28,45 +28,71 @@
 
             <nav class="nav">
                 @php $role = auth()->user()->role ?? null; @endphp
-            
+
                 {{-- Dashboard link based on role --}}
                 @if($role === 'admin')
                 <a class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}"
                     href="{{ route('admin.dashboard') }}">Dashboard</a>
-            
+
                 <a class="nav-link {{ request()->routeIs('admin.branches.*') ? 'active' : '' }}"
                     href="{{ route('admin.branches.index') }}">Branches</a>
 
-                    <a class="nav-link {{ request()->routeIs('admin.mainshop.*') ? 'active' : '' }}"
-                        href="{{ route('admin.mainshop.show') }}">Main Shop</a>
+                <a class="nav-link {{ request()->routeIs('admin.mainshop.*') ? 'active' : '' }}"
+                    href="{{ route('admin.mainshop.show') }}">Main Shop</a>
 
-                    <a class="nav-link {{ request()->routeIs('admin.mainshop.staff.*') ? 'active' : '' }}"
-                        href="{{ route('admin.mainshop.staff.index') }}">Main Shop Staff</a>
-                        <a class="nav-link {{ request()->routeIs('admin.perfumes.*') ? 'active' : '' }}"
-                            href="{{ route('admin.perfumes.index') }}">Perfumes</a>
-            
+                <a class="nav-link {{ request()->routeIs('admin.mainshop.staff.*') ? 'active' : '' }}"
+                    href="{{ route('admin.mainshop.staff.index') }}">Main Shop Staff</a>
+
+                <a class="nav-link {{ request()->routeIs('admin.perfumes.*') ? 'active' : '' }}"
+                    href="{{ route('admin.perfumes.index') }}">Perfumes</a>
+
+                <a class="nav-link {{ request()->routeIs('admin.batches.*') ? 'active' : '' }}"
+                    href="{{ route('admin.batches.index') }}">Batches</a>
+
+
+
                 @elseif($role === 'main_shop')
                 <a class="nav-link {{ request()->routeIs('main.dashboard') ? 'active' : '' }}"
                     href="{{ route('main.dashboard') }}">Dashboard</a>
-                    <a class="nav-link {{ request()->routeIs('main.branches.*') ? 'active' : '' }}"
-                        href="{{ route('main.branches.index') }}">Branches</a>
-                        <a class="nav-link {{ request()->routeIs('main.perfumes.*') ? 'active' : '' }}"
-                            href="{{ route('main.perfumes.index') }}">Perfumes</a>
-            
+                <a class="nav-link {{ request()->routeIs('main.branches.*') ? 'active' : '' }}"
+                    href="{{ route('main.branches.index') }}">Branches</a>
+
+                <a class="nav-link {{ request()->routeIs('main.perfumes.*') ? 'active' : '' }}"
+                    href="{{ route('main.perfumes.index') }}">Perfumes</a>
+
+                <a class="nav-link {{ request()->routeIs('main.batches.*') ? 'active' : '' }}"
+                    href="{{ route('main.batches.index') }}">Batches</a>
+
+                <a class="nav-link {{ request()->routeIs('main.transfers.*') ? 'active' : '' }}"
+                    href="{{ route('main.transfers.index') }}">Transfers</a>
+
+                <a class="nav-link {{ request()->routeIs('main.inventory.*') ? 'active' : '' }}"
+                    href="{{ route('main.inventory.index') }}">Inventory</a>
+
+
                 @elseif($role === 'branch_shop')
                 <a class="nav-link {{ request()->routeIs('branch.dashboard') ? 'active' : '' }}"
                     href="{{ route('branch.dashboard') }}">Dashboard</a>
-                    <a class="nav-link {{ request()->routeIs('branch.staff.*') ? 'active' : '' }}"
-                        href="{{ route('branch.staff.index') }}">Staff</a>
-            
+                <a class="nav-link {{ request()->routeIs('branch.staff.*') ? 'active' : '' }}"
+                    href="{{ route('branch.staff.index') }}">Staff</a>
+
+                <a class="nav-link {{ request()->routeIs('branch.transfers.*') ? 'active' : '' }}"
+                    href="{{ route('branch.transfers.claim_form') }}">Claim Transfer</a>
+
+                <a class="nav-link {{ request()->routeIs('branch.inventory.*') ? 'active' : '' }}"
+                    href="{{ route('branch.inventory.index') }}">Inventory</a>
+
+                <a class="nav-link {{ request()->routeIs('branch.transfers.index') ? 'active' : '' }}"
+                    href="{{ route('branch.transfers.index') }}">Transfer History</a>
+
                 @else
                 <a class="nav-link {{ request()->routeIs('staff.dashboard') ? 'active' : '' }}"
                     href="{{ route('staff.dashboard') }}">Dashboard</a>
-                    
+
                 @endif
             </nav>
 
-            
+
 
             <div class="sidebar-footer">
                 <div class="userbox">
