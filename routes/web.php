@@ -48,6 +48,12 @@ use App\Http\Controllers\Branch\TransferClaimController;
 use App\Http\Controllers\Branch\InventoryController;
 use App\Http\Controllers\MainShop\InventoryController as MainInventoryController;
 use App\Http\Controllers\Branch\TransferHistoryController;
+use App\Http\Controllers\POS\MainPosController;
+use App\Http\Controllers\POS\BranchPosController;
+use App\Http\Controllers\POS\PosApiController;
+use App\Http\Controllers\MainShop\BankController as MainBankController;
+use App\Http\Controllers\Branch\BankController as BranchBankController;
+
 
 Auth::routes();
 Route::post('/logout-user/{user}', [UserController::class, 'logoutUser'])->name('logoutUser');
@@ -202,6 +208,61 @@ Route::post('/main/transfers/{transfer}/cancel', [MainTransferController::class,
 
 
 Route::get('/branch/transfers', [TransferHistoryController::class, 'index'])->name('branch.transfers.index');
+
+
+Route::get('/main/pos', [MainPosController::class, 'index'])->name('main.pos');
+
+
+
+
+Route::get('/branch/pos', [BranchPosController::class, 'index'])->name('branch.pos');
+
+
+
+Route::get('/main/pos/items', [PosApiController::class, 'items'])->name('main.pos.items');
+Route::get('/main/pos/cart', [PosApiController::class, 'cart'])->name('main.pos.cart');
+Route::post('/main/pos/cart/add', [PosApiController::class, 'add'])->name('main.pos.cart.add');
+Route::post('/main/pos/cart/update', [PosApiController::class, 'update'])->name('main.pos.cart.update');
+Route::post('/main/pos/cart/remove', [PosApiController::class, 'remove'])->name('main.pos.cart.remove');
+
+
+Route::get('/branch/pos/items', [PosApiController::class, 'items'])->name('branch.pos.items');
+Route::get('/branch/pos/cart', [PosApiController::class, 'cart'])->name('branch.pos.cart');
+Route::post('/branch/pos/cart/add', [PosApiController::class, 'add'])->name('branch.pos.cart.add');
+Route::post('/branch/pos/cart/update', [PosApiController::class, 'update'])->name('branch.pos.cart.update');
+Route::post('/branch/pos/cart/remove', [PosApiController::class, 'remove'])->name('branch.pos.cart.remove');
+
+
+
+
+Route::get('/main/banks', [MainBankController::class, 'index'])->name('main.banks.index');
+Route::get('/main/banks/create', [MainBankController::class, 'create'])->name('main.banks.create');
+Route::post('/main/banks', [MainBankController::class, 'store'])->name('main.banks.store');
+Route::get('/main/banks/{bank}/edit', [MainBankController::class, 'edit'])->name('main.banks.edit');
+Route::put('/main/banks/{bank}', [MainBankController::class, 'update'])->name('main.banks.update');
+
+
+
+Route::get('/branch/banks', [BranchBankController::class, 'index'])->name('branch.banks.index');
+Route::get('/branch/banks/create', [BranchBankController::class, 'create'])->name('branch.banks.create');
+Route::post('/branch/banks', [BranchBankController::class, 'store'])->name('branch.banks.store');
+Route::get('/branch/banks/{bank}/edit', [BranchBankController::class, 'edit'])->name('branch.banks.edit');
+Route::put('/branch/banks/{bank}', [BranchBankController::class, 'update'])->name('branch.banks.update');
+
+
+
+
+Route::get('/main/pos/banks', [PosApiController::class, 'banks'])->name('main.pos.banks');
+Route::get('/branch/pos/banks', [PosApiController::class, 'banks'])->name('branch.pos.banks');
+
+
+
+
+
+
+
+
+
 
 
 

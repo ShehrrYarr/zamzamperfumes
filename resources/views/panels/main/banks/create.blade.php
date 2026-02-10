@@ -1,0 +1,74 @@
+@extends('layouts.panel')
+
+@section('title','Add Bank')
+@section('panel_name','Main Shop Panel')
+
+@section('content')
+<div class="grid">
+    <div class="col-12 card" style="max-width:900px;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;">
+            <div>
+                <h1 class="h1">Add Bank</h1>
+                <p class="muted">Create a bank that will appear in POS when payment method = Bank.</p>
+            </div>
+            <a class="btn btn-ghost" href="{{ route('main.banks.index') }}">← Back</a>
+        </div>
+
+        @if ($errors->any())
+        <div
+            style="margin-top:14px; padding:12px; border-radius:14px; background: rgba(255,0,90,0.10); border:1px solid rgba(255,0,90,0.25);">
+            <ul style="margin:0; padding-left:18px;">
+                @foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach
+            </ul>
+        </div>
+        @endif
+
+        <form method="POST" action="{{ route('main.banks.store') }}" style="margin-top:14px; display:grid; gap:12px;">
+            @csrf
+
+            <div class="grid">
+                <div class="col-6">
+                    <label style="display:block; margin-bottom:6px; color:rgba(255,255,255,0.75);">Bank Name</label>
+                    <input name="name" required value="{{ old('name') }}"
+                        style="width:100%; padding:12px; border-radius:14px; border:1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.06); color:white;"
+                        placeholder="e.g. HBL, MCB, Meezan">
+                </div>
+                <div class="col-6">
+                    <label style="display:block; margin-bottom:6px; color:rgba(255,255,255,0.75);">Account Title
+                        (optional)</label>
+                    <input name="account_title" value="{{ old('account_title') }}"
+                        style="width:100%; padding:12px; border-radius:14px; border:1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.06); color:white;"
+                        placeholder="e.g. JM Fragrances">
+                </div>
+            </div>
+
+            <div class="grid">
+                <div class="col-6">
+                    <label style="display:block; margin-bottom:6px; color:rgba(255,255,255,0.75);">Account Number
+                        (optional)</label>
+                    <input name="account_number" value="{{ old('account_number') }}"
+                        style="width:100%; padding:12px; border-radius:14px; border:1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.06); color:white;"
+                        placeholder="e.g. 1234567890">
+                </div>
+                <div class="col-6">
+                    <label style="display:block; margin-bottom:6px; color:rgba(255,255,255,0.75);">IBAN
+                        (optional)</label>
+                    <input name="iban" value="{{ old('iban') }}"
+                        style="width:100%; padding:12px; border-radius:14px; border:1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.06); color:white;"
+                        placeholder="e.g. PK00HABB0000000000000000">
+                </div>
+            </div>
+
+            <label style="display:flex; gap:10px; align-items:center; color:rgba(255,255,255,0.8);">
+                <input type="checkbox" name="is_active" value="1" {{ old('is_active', 1) ? 'checked' : '' }}>
+                Active (show in POS)
+            </label>
+
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                <button class="btn" type="submit">Save Bank</button>
+                <a class="btn btn-ghost" href="{{ route('main.banks.index') }}">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+@endsection

@@ -15,13 +15,17 @@ class CreateBanksTable extends Migration
     {
         Schema::create('banks', function (Blueprint $table) {
              $table->id();
-            $table->string('name');                 // e.g. HBL, MCB
-            $table->string('account_no')->nullable();
-            $table->string('branch')->nullable();
+            $table->foreignId('shop_id')->constrained('shops')->cascadeOnDelete();
+
+            $table->string('name');
+            $table->string('account_title')->nullable();
+            $table->string('account_number')->nullable();
             $table->string('iban')->nullable();
-            $table->string('swift')->nullable();
+
             $table->boolean('is_active')->default(true);
             $table->timestamps();
+
+            $table->index(['shop_id','is_active']);
         });
     }
 

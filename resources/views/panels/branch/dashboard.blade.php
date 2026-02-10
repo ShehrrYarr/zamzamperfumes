@@ -29,6 +29,7 @@
         <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
             <a class="btn" href="{{ route('branch.staff.index') }}">Manage Staff</a>
             <a class="btn btn-ghost" href="{{ route('branch.staff.create') }}">Add Staff</a>
+            <a class="btn" href="{{ route('branch.pos') }}">Open POS</a>
         </div>
     </div>
 </div>

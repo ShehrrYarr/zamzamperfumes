@@ -69,6 +69,9 @@
                 <a class="nav-link {{ request()->routeIs('main.inventory.*') ? 'active' : '' }}"
                     href="{{ route('main.inventory.index') }}">Inventory</a>
 
+                <a class="nav-link {{ request()->routeIs('main.banks.*') ? 'active' : '' }}"
+                    href="{{ route('main.banks.index') }}">Banks</a>
+
 
                 @elseif($role === 'branch_shop')
                 <a class="nav-link {{ request()->routeIs('branch.dashboard') ? 'active' : '' }}"
@@ -84,6 +87,9 @@
 
                 <a class="nav-link {{ request()->routeIs('branch.transfers.index') ? 'active' : '' }}"
                     href="{{ route('branch.transfers.index') }}">Transfer History</a>
+
+                <a class="nav-link {{ request()->routeIs('branch.banks.*') ? 'active' : '' }}"
+                    href="{{ route('branch.banks.index') }}">Banks</a>
 
                 @else
                 <a class="nav-link {{ request()->routeIs('staff.dashboard') ? 'active' : '' }}"

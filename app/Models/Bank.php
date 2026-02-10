@@ -10,11 +10,11 @@ class Bank extends Model
     use HasFactory;
     
      protected $fillable = [
-        'name', 'account_no', 'branch', 'iban', 'swift', 'is_active'
+        'shop_id','name','account_title','account_number','iban','is_active'
     ];
 
-    public function payments()
+    public function shop()
     {
-        return $this->hasMany(SalePayment::class);
+        return $this->belongsTo(\App\Models\Shop::class);
     }
 }

@@ -12,6 +12,7 @@
         </p>
     </div>
 
+   
     <div class="col-4 card">
         <h1 class="h1">{{ $branchesCount }}</h1>
         <p class="muted">Total Branches</p>
@@ -27,6 +28,7 @@
         <p class="muted">Actions</p>
         <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
             <a class="btn" href="{{ route('main.branches.index') }}">View Branches</a>
+            <a class="btn" href="{{ route('main.pos') }}">Open POS</a>
         </div>
     </div>
 </div>
