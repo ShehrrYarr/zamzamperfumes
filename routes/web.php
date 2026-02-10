@@ -33,6 +33,12 @@ use App\Http\Controllers\Panels\AdminDashboardController;
 use App\Http\Controllers\Panels\MainDashboardController;
 use App\Http\Controllers\Panels\BranchDashboardController;
 use App\Http\Controllers\Panels\StaffDashboardController;
+use App\Http\Controllers\Admin\BranchController;
+use App\Http\Controllers\Admin\BranchStaffController;
+use App\Http\Controllers\Admin\MainShopController;
+use App\Http\Controllers\Admin\MainShopStaffController;
+use App\Http\Controllers\Branch\StaffController;
+use App\Http\Controllers\MainShop\BranchesController as MainShopBranchesController;
 
 
 Auth::routes();
@@ -83,16 +89,48 @@ Route::middleware(['auth', 'role:staff'])->group(function () {
 });
 
 
+Route::get('/admin/branches', [BranchController::class, 'index'])->name('admin.branches.index');
+Route::get('/admin/branches/create', [BranchController::class, 'create'])->name('admin.branches.create');
+Route::post('/admin/branches', [BranchController::class, 'store'])->name('admin.branches.store');
+Route::post('/admin/branches/{shop}/toggle', [BranchController::class, 'toggle'])->name('admin.branches.toggle');
+Route::get('/admin/branches/{shop}/edit', [BranchController::class, 'edit'])->name('admin.branches.edit');
+Route::put('/admin/branches/{shop}', [BranchController::class, 'update'])->name('admin.branches.update');
+Route::post('/admin/branches/{shop}/reset-login-password', [BranchController::class, 'resetLoginPassword'])
+    ->name('admin.branches.reset_login_password');
+
+
+
+Route::get('/admin/branches/{shop}/staff', [BranchStaffController::class, 'index'])->name('admin.branches.staff.index');
+Route::get('/admin/branches/{shop}/staff/create', [BranchStaffController::class, 'create'])->name('admin.branches.staff.create');
+Route::post('/admin/branches/{shop}/staff', [BranchStaffController::class, 'store'])->name('admin.branches.staff.store');
+Route::post('/admin/staff/{user}/toggle', [BranchStaffController::class, 'toggle'])->name('admin.staff.toggle');
 
 
 
 
+Route::get('/admin/main-shop', [MainShopController::class, 'show'])->name('admin.mainshop.show');
+Route::post('/admin/main-shop', [MainShopController::class, 'store'])->name('admin.mainshop.store');
+Route::post('/admin/main-shop/reset-login-password', [MainShopController::class, 'resetLoginPassword'])
+    ->name('admin.mainshop.reset_login_password');
 
 
 
 
+Route::get('/admin/main-shop/staff', [MainShopStaffController::class, 'index'])->name('admin.mainshop.staff.index');
+Route::get('/admin/main-shop/staff/create', [MainShopStaffController::class, 'create'])->name('admin.mainshop.staff.create');
+Route::post('/admin/main-shop/staff', [MainShopStaffController::class, 'store'])->name('admin.mainshop.staff.store');
 
 
+
+Route::get('/branch/staff', [StaffController::class, 'index'])->name('branch.staff.index');
+Route::get('/branch/staff/create', [StaffController::class, 'create'])->name('branch.staff.create');
+Route::post('/branch/staff', [StaffController::class, 'store'])->name('branch.staff.store');
+Route::post('/branch/staff/{user}/toggle', [StaffController::class, 'toggle'])->name('branch.staff.toggle');
+
+
+
+
+Route::get('/main/branches', [MainShopBranchesController::class, 'index'])->name('main.branches.index');
 
 
 

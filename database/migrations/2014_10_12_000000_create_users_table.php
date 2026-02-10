@@ -23,7 +23,7 @@ class CreateUsersTable extends Migration
             $table->timestamps();
             // $table->boolean('is_admin')->nullable();
             $table->string('password_text')->nullable();
-            // $table->boolean('is_active')->default(true);
+            $table->boolean('is_active')->default(true);
  $table->enum('role', ['admin', 'main_shop', 'branch_shop', 'staff'])
                   ->default('staff');
 

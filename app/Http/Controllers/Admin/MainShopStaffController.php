@@ -1,0 +1,64 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Models\Shop;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
+
+class MainShopStaffController extends Controller
+{
+    private function mainShopOrFail(): Shop
+    {
+        $main = Shop::where('type', 'main')->first();
+        abort_if(!$main, 404, 'Main shop not found.');
+        return $main;
+    }
+
+    public function index()
+    {
+        $shop = $this->mainShopOrFail();
+
+        $staff = User::where('shop_id', $shop->id)
+            ->where('role', 'staff')
+            ->orderByDesc('id')
+            ->get();
+
+        return view('admin.mainshop.staff.index', compact('shop', 'staff'));
+    }
+
+    public function create()
+    {
+        $shop = $this->mainShopOrFail();
+        return view('admin.mainshop.staff.create', compact('shop'));
+    }
+
+    public function store(Request $request)
+    {
+        $shop = $this->mainShopOrFail();
+
+        $data = $request->validate([
+            'name'  => ['required','string','max:255'],
+            'email' => ['required','email','max:255','unique:users,email'],
+        ]);
+
+        $plainPassword = 'St@' . Str::random(8);
+
+        $user = User::create([
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'password' => Hash::make($plainPassword),
+            'password_text' => $plainPassword,
+            'role' => 'staff',
+            'shop_id' => $shop->id,
+            'is_active' => true,
+        ]);
+
+        return redirect()
+            ->route('admin.mainshop.staff.index')
+            ->with('success', "Main shop staff created. Email: {$user->email} Password: {$plainPassword}");
+    }
+}

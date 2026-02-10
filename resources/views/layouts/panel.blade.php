@@ -21,18 +21,48 @@
             <div class="brand">
                 <div class="logo">JF</div>
                 <div class="brand-text">
-                    <div class="brand-title">JM Fragrances</div>
+                    <div class="brand-title">Zam Zam Perfume</div>
                     <div class="brand-sub">@yield('panel_name', 'Panel')</div>
                 </div>
             </div>
 
             <nav class="nav">
-                <a class="nav-link {{ request()->routeIs('*.dashboard') ? 'active' : '' }}" href="#">
-                    <span>Dashboard</span>
-                </a>
+                @php $role = auth()->user()->role ?? null; @endphp
+            
+                {{-- Dashboard link based on role --}}
+                @if($role === 'admin')
+                <a class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}"
+                    href="{{ route('admin.dashboard') }}">Dashboard</a>
+            
+                <a class="nav-link {{ request()->routeIs('admin.branches.*') ? 'active' : '' }}"
+                    href="{{ route('admin.branches.index') }}">Branches</a>
 
-                {{-- Later we’ll add: Branches, Staff, Inventory, POS, Attendance --}}
+                    <a class="nav-link {{ request()->routeIs('admin.mainshop.*') ? 'active' : '' }}"
+                        href="{{ route('admin.mainshop.show') }}">Main Shop</a>
+
+                    <a class="nav-link {{ request()->routeIs('admin.mainshop.staff.*') ? 'active' : '' }}"
+                        href="{{ route('admin.mainshop.staff.index') }}">Main Shop Staff</a>
+            
+                @elseif($role === 'main_shop')
+                <a class="nav-link {{ request()->routeIs('main.dashboard') ? 'active' : '' }}"
+                    href="{{ route('main.dashboard') }}">Dashboard</a>
+                    <a class="nav-link {{ request()->routeIs('main.branches.*') ? 'active' : '' }}"
+                        href="{{ route('main.branches.index') }}">Branches</a>
+            
+                @elseif($role === 'branch_shop')
+                <a class="nav-link {{ request()->routeIs('branch.dashboard') ? 'active' : '' }}"
+                    href="{{ route('branch.dashboard') }}">Dashboard</a>
+                    <a class="nav-link {{ request()->routeIs('branch.staff.*') ? 'active' : '' }}"
+                        href="{{ route('branch.staff.index') }}">Staff</a>
+            
+                @else
+                <a class="nav-link {{ request()->routeIs('staff.dashboard') ? 'active' : '' }}"
+                    href="{{ route('staff.dashboard') }}">Dashboard</a>
+                    
+                @endif
             </nav>
+
+            
 
             <div class="sidebar-footer">
                 <div class="userbox">
