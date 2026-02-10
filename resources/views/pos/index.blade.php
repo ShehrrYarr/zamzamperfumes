@@ -11,16 +11,20 @@
         :root {
             --bg1: #0f172a;
             --bg2: #020617;
-            --card: rgba(255, 255, 255, .06);
             --border: rgba(255, 255, 255, .10);
             --text: #e5e7eb;
             --muted: #94a3b8;
             --accent: #22c55e;
             --accent2: #38bdf8;
             --danger: #ef4444;
-            --warning: #f59e0b;
             --radius: 18px;
             --shadow: 0 25px 60px rgba(0, 0, 0, .55);
+
+            /* Today Sales alternate theme */
+            --todayBg1: #0b1220;
+            --todayBg2: #07131f;
+            --todayBorder: rgba(56, 189, 248, .20);
+            --todayGlow: 0 25px 60px rgba(56, 189, 248, .12);
         }
 
         * {
@@ -111,6 +115,13 @@
             transform: none
         }
 
+        .btn:disabled {
+            opacity: .55;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
         .btn-back {
             background: linear-gradient(135deg, #38bdf8, #0ea5e9);
             color: #042f2e;
@@ -175,6 +186,36 @@
 
         .card-b {
             padding: 18px
+        }
+
+        /* Today Sales alternate style */
+        .card-today {
+            background:
+                radial-gradient(900px 340px at 20% 0%, rgba(56, 189, 248, .16), transparent),
+                linear-gradient(180deg, var(--todayBg1), var(--todayBg2));
+            border: 1px solid var(--todayBorder);
+            box-shadow: var(--todayGlow);
+        }
+
+        .card-today .card-h {
+            border-bottom: 1px solid rgba(56, 189, 248, .20);
+        }
+
+        .card-today .btn {
+            border-color: rgba(56, 189, 248, .28);
+        }
+
+        .card-today .table-wrap {
+            border-color: rgba(56, 189, 248, .20);
+        }
+
+        .card-today th {
+            color: rgba(226, 232, 240, .92);
+        }
+
+        .card-today td,
+        .card-today .small {
+            color: rgba(226, 232, 240, .86);
         }
 
         .controls {
@@ -444,11 +485,28 @@
                     <div class="card-h">
                         <div>
                             <div class="h">Cart</div>
-                            <div class="sub">Discount + payment selection (checkout next step).</div>
+                            <div class="sub">Customer + discount + payment + checkout</div>
                         </div>
                     </div>
 
                     <div class="card-b">
+
+                        {{-- Customer --}}
+                        <div style="margin-bottom:12px;">
+                            <div class="small" style="margin-bottom:6px;">Customer (optional)</div>
+                            <div class="form-grid">
+                                <input id="customerName" class="input" style="min-width:auto; width:100%;"
+                                    placeholder="Customer name (optional)">
+                                <input id="customerPhone" class="input" style="min-width:auto; width:100%;"
+                                    placeholder="Customer phone (optional)">
+                            </div>
+                            <div class="small" style="margin-top:6px;">Leave empty for Walk-in customer.</div>
+                        </div>
+
+                        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px;">
+                            <button id="checkoutBtn" class="btn btn-accent" type="button">Complete Sale</button>
+                        </div>
+
                         {{-- Payment + Discount UI --}}
                         <div class="form-grid">
                             <div>
@@ -539,27 +597,78 @@
                             </div>
                         </div>
 
+                        {{-- RETURNS --}}
+                        <hr class="sep">
+                        <div style="margin-top:10px;">
+                            <div class="small" style="margin-bottom:6px;">Return (by Sale ID)</div>
+                            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                                <input id="returnSaleId" class="input" style="min-width:auto; width:180px;"
+                                    placeholder="Sale ID">
+                                <button id="returnBtn" class="btn btn-danger" type="button">Process Return</button>
+                            </div>
+                            <div class="small" style="margin-top:6px;">Enter receipt sale ID to process full return.
+                            </div>
+                        </div>
+
                         <div class="small" style="margin-top:10px;">
-                            Next step will add: Checkout (save sale + payment), receipt in new tab, and stock deduction.
+                            After checkout/return, receipt will open in a new tab.
                         </div>
                     </div>
                 </div>
 
             </div>
 
-            {{-- Today Sales placeholder remains --}}
+            {{-- TODAY SALES (different colors) --}}
             <div style="height:18px;"></div>
-            <div class="card fade">
+            <div class="card card-today fade">
                 <div class="card-h">
                     <div>
                         <div class="h">Today’s Sales</div>
-                        <div class="sub">Will be implemented after checkout.</div>
+                        <div class="sub">Summary for this shop only</div>
                     </div>
+                    <button id="refreshTodayBtn" class="btn btn-ghost" type="button">Refresh</button>
                 </div>
                 <div class="card-b">
-                    <div class="small">Pending…</div>
+                    <div class="kpi" style="margin-bottom:12px;">
+                        <div class="box">
+                            <div class="v" id="todayCount">0</div>
+                            <div class="t">Sales</div>
+                        </div>
+                        <div class="box">
+                            <div class="v" id="todayGrand">0.00</div>
+                            <div class="t">Total</div>
+                        </div>
+                        <div class="box">
+                            <div class="v" id="todayCounter">0.00</div>
+                            <div class="t">Counter</div>
+                        </div>
+                        <div class="box">
+                            <div class="v" id="todayBank">0.00</div>
+                            <div class="t">Bank</div>
+                        </div>
+                    </div>
+
+                    <div class="table-wrap">
+                        <table style="min-width:720px;">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Time</th>
+                                    <th>Customer</th>
+                                    <th>Method</th>
+                                    <th class="right">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody id="todayBody">
+                                <tr>
+                                    <td colspan="5" class="small">Loading…</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
+
         </div>
     </div>
 
@@ -574,6 +683,9 @@
     update: mode === 'main' ? @json(route('main.pos.cart.update')) : @json(route('branch.pos.cart.update')),
     remove: mode === 'main' ? @json(route('main.pos.cart.remove')) : @json(route('branch.pos.cart.remove')),
     banks: mode === 'main' ? @json(route('main.pos.banks')) : @json(route('branch.pos.banks')),
+    checkout: mode === 'main' ? @json(route('main.pos.checkout')) : @json(route('branch.pos.checkout')),
+    today: mode === 'main' ? @json(route('main.pos.today')) : @json(route('branch.pos.today')),
+    posReturn: mode === 'main' ? @json(route('main.pos.return')) : @json(route('branch.pos.return')),
   };
 
   const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
@@ -595,7 +707,21 @@
   const bankBox = document.getElementById('bankBox');
   const bankSelect = document.getElementById('bankSelect');
 
-  let cartState = []; // keep latest cart for totals
+  const checkoutBtn = document.getElementById('checkoutBtn');
+  const customerNameEl = document.getElementById('customerName');
+  const customerPhoneEl = document.getElementById('customerPhone');
+
+  const returnSaleIdEl = document.getElementById('returnSaleId');
+  const returnBtn = document.getElementById('returnBtn');
+
+  const todayCountEl = document.getElementById('todayCount');
+  const todayGrandEl = document.getElementById('todayGrand');
+  const todayCounterEl = document.getElementById('todayCounter');
+  const todayBankEl = document.getElementById('todayBank');
+  const todayBody = document.getElementById('todayBody');
+  const refreshTodayBtn = document.getElementById('refreshTodayBtn');
+
+  let cartState = [];
 
   function showToast(msg, type='info'){
     toast.style.display = 'block';
@@ -636,10 +762,7 @@
     return res.json();
   }
 
-  function money(n){
-    const v = Number(n || 0);
-    return v.toFixed(2);
-  }
+  function money(n){ return Number(n || 0).toFixed(2); }
 
   function calcSubtotal(cart){
     return (cart || []).reduce((sum, c) => sum + (Number(c.price||0) * Number(c.qty||0)), 0);
@@ -648,18 +771,12 @@
   function calcDiscount(subtotal){
     const t = discountType.value;
     const v = Number(discountValue.value || 0);
-
     if (t === 'none' || v <= 0) return 0;
-
-    if (t === 'flat') {
-      return Math.max(0, Math.min(v, subtotal));
-    }
-
+    if (t === 'flat') return Math.max(0, Math.min(v, subtotal));
     if (t === 'percent') {
       const pct = Math.max(0, Math.min(v, 100));
       return Math.max(0, Math.min((subtotal * pct / 100), subtotal));
     }
-
     return 0;
   }
 
@@ -667,7 +784,6 @@
     const subtotal = calcSubtotal(cartState);
     const disc = calcDiscount(subtotal);
     const grand = Math.max(0, subtotal - disc);
-
     cartSubtotalEl.textContent = money(subtotal);
     cartDiscountEl.textContent = money(disc);
     cartGrandEl.textContent = money(grand);
@@ -678,7 +794,6 @@
       itemsBody.innerHTML = `<tr><td colspan="5" class="small">No items found.</td></tr>`;
       return;
     }
-
     itemsBody.innerHTML = items.map(it => `
       <tr>
         <td><b>${it.barcode}</b></td>
@@ -784,7 +899,6 @@
     renderItems(data.items);
   }
 
-  // barcode: exact lookup then auto-add first result
   barcodeInput.addEventListener('keydown', async (e) => {
     if(e.key !== 'Enter') return;
     e.preventDefault();
@@ -822,11 +936,9 @@
     t = setTimeout(searchItems, 350);
   });
 
-  // Discount changes refresh totals
   discountType.addEventListener('change', refreshTotals);
   discountValue.addEventListener('input', refreshTotals);
 
-  // Payment method toggle
   function handlePayToggle(){
     const method = document.querySelector('input[name="pay_method"]:checked')?.value || 'counter';
     bankBox.style.display = (method === 'bank') ? 'block' : 'none';
@@ -834,7 +946,6 @@
   document.querySelectorAll('input[name="pay_method"]').forEach(r => r.addEventListener('change', handlePayToggle));
   handlePayToggle();
 
-  // Load banks
   async function loadBanks(){
     try{
       const data = await httpGet(routes.banks);
@@ -851,9 +962,135 @@
     }
   }
 
+  async function loadTodaySales(){
+    try{
+      const data = await httpGet(routes.today);
+      const s = data.summary || {};
+      todayCountEl.textContent = String(s.count || 0);
+      todayGrandEl.textContent = money(s.grand_total || 0);
+      todayCounterEl.textContent = money(s.counter_total || 0);
+      todayBankEl.textContent = money(s.bank_total || 0);
+
+      const rows = data.sales || [];
+      if(rows.length === 0){
+        todayBody.innerHTML = `<tr><td colspan="5" class="small">No sales today.</td></tr>`;
+        return;
+      }
+
+      todayBody.innerHTML = rows.map(r => `
+        <tr>
+          <td><b>#${r.id}</b></td>
+          <td>${r.time || '—'}</td>
+          <td>${r.customer || 'Walk-in'}</td>
+          <td>${(r.method || '—').toUpperCase()}${r.bank ? `<div class="small">${r.bank}</div>` : ''}</td>
+          <td class="right"><b>${money(r.total)}</b></td>
+        </tr>
+      `).join('');
+    }catch(e){
+      todayBody.innerHTML = `<tr><td colspan="5" class="small">Failed to load today sales.</td></tr>`;
+    }
+  }
+
+  refreshTodayBtn.addEventListener('click', loadTodaySales);
+
+  // Checkout
+  checkoutBtn.addEventListener('click', async () => {
+    if(!cartState || cartState.length === 0){
+      showToast('Cart is empty', 'error');
+      return;
+    }
+
+    const method = document.querySelector('input[name="pay_method"]:checked')?.value || 'counter';
+    const bankId = bankSelect ? bankSelect.value : '';
+
+    if(method === 'bank' && !bankId){
+      showToast('Please select a bank', 'error');
+      return;
+    }
+
+    const payload = {
+      customer_name: (customerNameEl?.value || '').trim(),
+      customer_phone: (customerPhoneEl?.value || '').trim(),
+      discount_type: discountType.value,
+      discount_value: Number(discountValue.value || 0),
+      payment_method: method,
+      bank_id: method === 'bank' ? Number(bankId) : null,
+    };
+
+    try{
+      checkoutBtn.disabled = true;
+      checkoutBtn.textContent = 'Processing…';
+
+      const res = await httpPost(routes.checkout, payload);
+
+      if(res.ok){
+        showToast('Sale completed ✅');
+
+        if(res.receipt_url){
+          window.open(res.receipt_url, '_blank');
+        }
+
+        cartState = [];
+        renderCart([]);
+        customerNameEl.value = '';
+        customerPhoneEl.value = '';
+        discountType.value = 'none';
+        discountValue.value = 0;
+        refreshTotals();
+
+        await loadTodaySales();
+      }else{
+        showToast(res.message || 'Checkout failed', 'error');
+      }
+    }catch(e){
+      showToast('Checkout failed: ' + e.message, 'error');
+    }finally{
+      checkoutBtn.disabled = false;
+      checkoutBtn.textContent = 'Complete Sale';
+      barcodeInput.focus();
+    }
+  });
+
+  // Return
+  returnBtn.addEventListener('click', async () => {
+    const saleId = Number((returnSaleIdEl.value || '').trim());
+    if(!saleId){
+      showToast('Enter a valid Sale ID', 'error');
+      return;
+    }
+
+    if(!confirm('Process full return for Sale #' + saleId + '?')){
+      return;
+    }
+
+    try{
+      returnBtn.disabled = true;
+      returnBtn.textContent = 'Processing…';
+
+      const res = await httpPost(routes.posReturn, { sale_id: saleId });
+
+      if(res.ok){
+        showToast('Return processed ✅');
+        if(res.return_receipt_url){
+          window.open(res.return_receipt_url, '_blank');
+        }
+        returnSaleIdEl.value = '';
+        await loadTodaySales();
+      }else{
+        showToast(res.message || 'Return failed', 'error');
+      }
+    }catch(e){
+      showToast('Return failed: ' + e.message, 'error');
+    }finally{
+      returnBtn.disabled = false;
+      returnBtn.textContent = 'Process Return';
+    }
+  });
+
   // initial
   loadCart();
   loadBanks();
+  loadTodaySales();
   barcodeInput.focus();
 })();
     </script>

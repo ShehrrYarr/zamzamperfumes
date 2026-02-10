@@ -257,6 +257,42 @@ Route::get('/branch/pos/banks', [PosApiController::class, 'banks'])->name('branc
 
 
 
+Route::post('/main/pos/checkout', [\App\Http\Controllers\POS\CheckoutController::class, 'checkout'])->name('main.pos.checkout');
+Route::post('/branch/pos/checkout', [\App\Http\Controllers\POS\CheckoutController::class, 'checkout'])->name('branch.pos.checkout');
+
+
+
+Route::get('/main/pos/receipt/{sale}', [\App\Http\Controllers\POS\ReceiptController::class, 'show'])
+  ->name('main.pos.receipt');
+
+Route::get('/main/pos/today', [\App\Http\Controllers\POS\TodaySalesController::class, 'index'])
+  ->name('main.pos.today');
+
+
+
+  Route::get('/branch/pos/receipt/{sale}', [\App\Http\Controllers\POS\ReceiptController::class, 'show'])
+  ->name('branch.pos.receipt');
+
+Route::get('/branch/pos/today', [\App\Http\Controllers\POS\TodaySalesController::class, 'index'])
+  ->name('branch.pos.today');
+
+
+
+
+  Route::post('/main/pos/return', [\App\Http\Controllers\POS\ReturnController::class, 'process'])
+  ->name('main.pos.return');
+
+Route::get('/main/pos/return-receipt/{sale}', [\App\Http\Controllers\POS\ReturnReceiptController::class, 'show'])
+  ->name('main.pos.return_receipt');
+
+
+
+
+ Route::post('/branch/pos/return', [\App\Http\Controllers\POS\ReturnController::class, 'process'])
+  ->name('branch.pos.return');
+
+Route::get('/branch/pos/return-receipt/{sale}', [\App\Http\Controllers\POS\ReturnReceiptController::class, 'show'])
+  ->name('branch.pos.return_receipt');
 
 
 
