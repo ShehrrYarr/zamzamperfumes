@@ -22,4 +22,9 @@ class Attendance extends Model
 
     public function shop(){ return $this->belongsTo(Shop::class); }
     public function user(){ return $this->belongsTo(User::class); }
+
+    public function sessions()
+{
+    return $this->hasMany(AttendanceSession::class);
+}
 }
