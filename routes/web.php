@@ -39,6 +39,8 @@ use App\Http\Controllers\Admin\MainShopController;
 use App\Http\Controllers\Admin\MainShopStaffController;
 use App\Http\Controllers\Branch\StaffController;
 use App\Http\Controllers\MainShop\BranchesController as MainShopBranchesController;
+use App\Http\Controllers\Admin\PerfumeController as AdminPerfumeController;
+use App\Http\Controllers\MainShop\PerfumeController as MainPerfumeController;
 
 
 Auth::routes();
@@ -135,6 +137,20 @@ Route::get('/main/branches', [MainShopBranchesController::class, 'index'])->name
 
 
 
+Route::get('/admin/perfumes', [AdminPerfumeController::class, 'index'])->name('admin.perfumes.index');
+Route::get('/admin/perfumes/create', [AdminPerfumeController::class, 'create'])->name('admin.perfumes.create');
+Route::post('/admin/perfumes', [AdminPerfumeController::class, 'store'])->name('admin.perfumes.store');
+Route::get('/admin/perfumes/{perfume}/edit', [AdminPerfumeController::class, 'edit'])->name('admin.perfumes.edit');
+Route::put('/admin/perfumes/{perfume}', [AdminPerfumeController::class, 'update'])->name('admin.perfumes.update');
+
+
+
+
+Route::get('/main/perfumes', [MainPerfumeController::class, 'index'])->name('main.perfumes.index');
+Route::get('/main/perfumes/create', [MainPerfumeController::class, 'create'])->name('main.perfumes.create');
+Route::post('/main/perfumes', [MainPerfumeController::class, 'store'])->name('main.perfumes.store');
+Route::get('/main/perfumes/{perfume}/edit', [MainPerfumeController::class, 'edit'])->name('main.perfumes.edit');
+Route::put('/main/perfumes/{perfume}', [MainPerfumeController::class, 'update'])->name('main.perfumes.update');
 
 
 

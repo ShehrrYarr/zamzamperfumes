@@ -42,12 +42,16 @@
 
                     <a class="nav-link {{ request()->routeIs('admin.mainshop.staff.*') ? 'active' : '' }}"
                         href="{{ route('admin.mainshop.staff.index') }}">Main Shop Staff</a>
+                        <a class="nav-link {{ request()->routeIs('admin.perfumes.*') ? 'active' : '' }}"
+                            href="{{ route('admin.perfumes.index') }}">Perfumes</a>
             
                 @elseif($role === 'main_shop')
                 <a class="nav-link {{ request()->routeIs('main.dashboard') ? 'active' : '' }}"
                     href="{{ route('main.dashboard') }}">Dashboard</a>
                     <a class="nav-link {{ request()->routeIs('main.branches.*') ? 'active' : '' }}"
                         href="{{ route('main.branches.index') }}">Branches</a>
+                        <a class="nav-link {{ request()->routeIs('main.perfumes.*') ? 'active' : '' }}"
+                            href="{{ route('main.perfumes.index') }}">Perfumes</a>
             
                 @elseif($role === 'branch_shop')
                 <a class="nav-link {{ request()->routeIs('branch.dashboard') ? 'active' : '' }}"
