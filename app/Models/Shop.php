@@ -16,4 +16,13 @@ class Shop extends Model
 {
     return $this->hasMany(\App\Models\User::class);
 }
+
+protected static function booted()
+{
+    static::creating(function ($shop) {
+        if (empty($shop->qr_token)) {
+            $shop->qr_token = \Illuminate\Support\Str::random(60);
+        }
+    });
+}
 }

@@ -54,7 +54,8 @@ use App\Http\Controllers\POS\PosApiController;
 use App\Http\Controllers\MainShop\BankController as MainBankController;
 use App\Http\Controllers\Branch\BankController as BranchBankController;
 use App\Http\Controllers\Admin\AdminReportsController;
-
+use App\Http\Controllers\Staff\AttendanceScanController;
+use App\Http\Controllers\Staff\StaffAttendanceController;
 
 Auth::routes();
 Route::post('/logout-user/{user}', [UserController::class, 'logoutUser'])->name('logoutUser');
@@ -339,6 +340,57 @@ Route::middleware(['auth'])->group(function () {
     });
 
 });
+
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/staff/scan/{token}', [AttendanceScanController::class, 'scan'])
+        ->name('staff.scan');
+});
+
+
+Route::get('/branch/qr', function () {
+    $shop = \App\Models\Shop::findOrFail(auth()->user()->shop_id);
+    abort_if(auth()->user()->role !== 'branch_shop', 403);
+    return view('panels.branch.qr', compact('shop'));
+})->name('branch.qr');
+
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/staff/attendance/{token}', [StaffAttendanceController::class, 'show'])
+        ->name('staff.attendance');
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
