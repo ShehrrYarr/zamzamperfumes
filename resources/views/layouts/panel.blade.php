@@ -18,6 +18,301 @@
 </head>
 
 <body>
+    <style>
+        :root{
+        --primary:#2f3542;
+        --primary-light:#57606f;
+        
+        --bg:#f5f6fa;
+        --bg-soft:#eef1f5;
+        
+        --card-bg:rgba(255,255,255,0.75);
+        --card-border:rgba(0,0,0,0.06);
+        
+        --text:#1e272e;
+        --muted:#6c757d;
+        
+        --shadow:0 8px 24px rgba(0,0,0,0.06);
+        --radius:16px;
+        }
+        
+        *{
+        box-sizing:border-box;
+        }
+        
+        body{
+        margin:0;
+        font-family: 'Inter', sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        }
+        
+        /* Layout */
+        .app{
+        display:flex;
+        min-height:100vh;
+        }
+        
+        /* Sidebar */
+        .sidebar{
+        width:260px;
+        background: linear-gradient(180deg,#ffffff,#f8f9fb);
+        border-right:1px solid var(--card-border);
+        padding:20px 16px;
+        display:flex;
+        flex-direction:column;
+        transition: all .25s ease;
+        box-shadow: 4px 0 20px rgba(0,0,0,.03);
+        }
+        
+        .brand{
+        display:flex;
+        align-items:center;
+        gap:12px;
+        margin-bottom:25px;
+        }
+        
+        .logo{
+        width:42px;
+        height:42px;
+        border-radius:12px;
+        background:#2f3542;
+        color:#fff;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        font-weight:700;
+        }
+        
+        .brand-title{
+        font-weight:700;
+        font-size:16px;
+        }
+        
+        .brand-sub{
+        font-size:12px;
+        color:var(--muted);
+        }
+        
+        /* Navigation */
+        .nav{
+        display:flex;
+        flex-direction:column;
+        gap:8px;
+        }
+        
+        .nav-link{
+        padding:10px 14px;
+        border-radius:12px;
+        color:var(--primary);
+        font-weight:500;
+        text-decoration:none;
+        transition:.2s ease;
+        }
+        
+        .nav-link:hover{
+        background:var(--bg-soft);
+        text-decoration:none;
+        }
+        
+        .nav-link.active{
+        background:#e9ecef;
+        font-weight:600;
+        }
+        
+        /* Sidebar footer */
+        .sidebar-footer{
+        margin-top:auto;
+        border-top:1px solid var(--card-border);
+        padding-top:15px;
+        }
+        
+        .userbox{
+        display:flex;
+        align-items:center;
+        gap:10px;
+        }
+        
+        .avatar{
+        width:38px;
+        height:38px;
+        border-radius:10px;
+        background:#dfe4ea;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        font-weight:600;
+        }
+        
+        .user-name{
+        font-weight:600;
+        }
+        
+        .user-role{
+        font-size:12px;
+        color:var(--muted);
+        }
+        
+        /* Main */
+        .main{
+        flex:1;
+        display:flex;
+        flex-direction:column;
+        }
+        
+        /* Topbar */
+        .topbar{
+        background:#ffffff;
+        border-bottom:1px solid var(--card-border);
+        padding:14px 20px;
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        box-shadow: 0 4px 12px rgba(0,0,0,.02);
+        }
+        
+        .icon-btn{
+        border:none;
+        background:#f1f2f6;
+        border-radius:10px;
+        padding:8px 12px;
+        cursor:pointer;
+        transition:.2s;
+        }
+        
+        .icon-btn:hover{
+        background:#e9ecef;
+        }
+        
+        .topbar-right{
+        display:flex;
+        gap:10px;
+        }
+        
+        .pill{
+        background:#f1f2f6;
+        padding:6px 12px;
+        border-radius:999px;
+        font-size:12px;
+        color:var(--primary-light);
+        }
+        
+        /* Content */
+        .content{
+        padding:20px;
+        }
+        
+        .page{
+        animation: fadeUp .3s ease both;
+        }
+        
+        @keyframes fadeUp{
+        from { opacity:0; transform: translateY(6px); }
+        to { opacity:1; transform: translateY(0); }
+        }
+        
+        /* Glass Cards */
+        .card{
+        background: var(--card-bg);
+        backdrop-filter: blur(10px);
+        border:1px solid var(--card-border);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        padding:20px;
+        }
+        
+        /* Grid */
+        .grid{
+        display:grid;
+        grid-template-columns: repeat(12,1fr);
+        gap:20px;
+        }
+        
+        .col-12{ grid-column: span 12; }
+        .col-6{ grid-column: span 6; }
+        .col-4{ grid-column: span 4; }
+        .col-3{ grid-column: span 3; }
+        
+        /* Buttons */
+        .btn{
+        border-radius:10px;
+        }
+        
+        .btn-primary{
+        background:#2f3542;
+        border:none;
+        }
+        
+        .btn-primary:hover{
+        background:#1e272e;
+        }
+        
+        /* Forms */
+        .form-control{
+        border-radius:10px;
+        border:1px solid #dfe4ea;
+        }
+        
+        .form-control:focus{
+        border-color:#ced6e0;
+        box-shadow:none;
+        }
+        
+        /* Table */
+        .table{
+        background:#fff;
+        border-radius:12px;
+        overflow:hidden;
+        }
+        
+        .table thead{
+        background:#f1f2f6;
+        }
+        
+        .table th{
+        font-weight:600;
+        }
+        
+        /* Sidebar collapse */
+        .app[data-sidebar="collapsed"] .sidebar{
+        width:80px;
+        }
+        
+        .app[data-sidebar="collapsed"] .brand-text,
+        .app[data-sidebar="collapsed"] .user-meta{
+        display:none;
+        }
+        
+        .app[data-sidebar="collapsed"] .nav-link{
+        text-align:center;
+        padding:10px 8px;
+        font-size:12px;
+        }
+        
+        /* Mobile */
+        @media(max-width:992px){
+        .sidebar{
+        position:fixed;
+        left:0;
+        top:0;
+        bottom:0;
+        z-index:999;
+        transform:translateX(-100%);
+        }
+        
+        .app[data-sidebar="open"] .sidebar{
+        transform:translateX(0);
+        }
+        
+        .main{
+        margin-left:0 !important;
+        }
+        
+        .col-6,.col-4,.col-3{
+        grid-column: span 12;
+        }
+        }
+    </style>
     <div class="app" data-sidebar="open">
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-overlay" id="sidebarOverlay"></div>
