@@ -48,4 +48,31 @@
         </form>
     </div>
 </div>
+<script>
+    (function(){
+    const monthly = document.querySelector('input[name="monthly_salary"]');
+    const hours = document.querySelector('input[name="work_hours_per_day"]');
+    const daily = document.querySelector('input[name="daily_salary"]');
+    const hourly = document.querySelector('input[name="hourly_salary"]');
+
+    function calc(){
+      const m = parseFloat(monthly?.value || '0');
+      const h = parseInt(hours?.value || '10', 10) || 10;
+
+      if (m > 0) {
+        const d = m / 30;
+        const hr = d / h;
+        daily.value = d.toFixed(2);
+        hourly.value = hr.toFixed(2);
+      } else {
+        daily.value = '';
+        hourly.value = '';
+      }
+    }
+
+    monthly?.addEventListener('input', calc);
+    hours?.addEventListener('input', calc);
+    calc();
+  })();
+</script>
 @endsection

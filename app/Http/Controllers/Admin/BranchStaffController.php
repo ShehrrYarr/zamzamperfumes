@@ -51,6 +51,24 @@ class BranchStaffController extends Controller
             'is_active' => true,
         ]);
 
+        $monthly = $request->monthly_salary !== null ? (float)$request->monthly_salary : null;
+$workHours = (int)$request->work_hours_per_day;
+
+$daily = null;
+$hourly = null;
+
+if ($monthly !== null && $monthly > 0) {
+    $daily = round($monthly / 30, 2);
+    $hourly = $workHours > 0 ? round($daily / $workHours, 4) : 0;
+}
+
+$user->monthly_salary = $monthly;
+$user->work_hours_per_day = $workHours;
+$user->daily_salary = $daily;
+$user->hourly_salary = $hourly;
+
+$user->save();
+
         return redirect()
             ->route('admin.branches.staff.index', $shop->id)
             ->with('success', "Staff created. Email: {$user->email} Password: {$plainPassword}");

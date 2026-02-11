@@ -57,6 +57,29 @@ class MainShopStaffController extends Controller
             'is_active' => true,
         ]);
 
+        $request->validate([
+    'monthly_salary' => ['nullable','numeric','min:0'],
+    'work_hours_per_day' => ['required','integer','min:1','max:24'],
+]);
+
+$monthly = $request->monthly_salary !== null ? (float)$request->monthly_salary : null;
+$workHours = (int)$request->work_hours_per_day;
+
+$daily = null;
+$hourly = null;
+
+if ($monthly !== null && $monthly > 0) {
+    $daily = round($monthly / 30, 2);
+    $hourly = $workHours > 0 ? round($daily / $workHours, 4) : 0;
+}
+
+$user->monthly_salary = $monthly;
+$user->work_hours_per_day = $workHours;
+$user->daily_salary = $daily;
+$user->hourly_salary = $hourly;
+
+$user->save();
+
         return redirect()
             ->route('admin.mainshop.staff.index')
             ->with('success', "Main shop staff created. Email: {$user->email} Password: {$plainPassword}");

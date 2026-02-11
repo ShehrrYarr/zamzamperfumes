@@ -41,6 +41,8 @@
                     style="width:100%; padding:12px; border-radius:14px; border:1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.06); color:white;">
             </div>
 
+            
+
             <div style="display:flex; gap:10px; flex-wrap:wrap;">
                 <button class="btn" type="submit">Create Staff</button>
                 <a class="btn btn-ghost" href="{{ route('branch.staff.index') }}">Cancel</a>
