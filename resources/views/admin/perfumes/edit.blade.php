@@ -30,30 +30,30 @@
 
             <div class="grid">
                 <div class="col-6">
-                    <label style="display:block; margin-bottom:6px; color:rgba(255,255,255,0.75);">Name</label>
+                    <label style="display:block; margin-bottom:6px; ">Name</label>
                     <input name="name" required value="{{ old('name', $perfume->name) }}"
-                        style="width:100%; padding:12px; border-radius:14px; border:1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.06); color:white;">
+                        style="width:100%; padding:12px; border-radius:14px; border:1px solid">
                 </div>
                 <div class="col-6">
-                    <label style="display:block; margin-bottom:6px; color:rgba(255,255,255,0.75);">Brand</label>
+                    <label style="display:block; margin-bottom:6px;">Brand</label>
                     <input name="brand" value="{{ old('brand', $perfume->brand) }}"
-                        style="width:100%; padding:12px; border-radius:14px; border:1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.06); color:white;">
+                        style="width:100%; padding:12px; border-radius:14px; border:1px solid">
                 </div>
             </div>
 
             <div>
-                <label style="display:block; margin-bottom:6px; color:rgba(255,255,255,0.75);">SKU</label>
+                <label style="display:block; margin-bottom:6px;">SKU</label>
                 <input name="sku" value="{{ old('sku', $perfume->sku) }}"
-                    style="width:100%; padding:12px; border-radius:14px; border:1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.06); color:white;">
+                    style="width:100%; padding:12px; border-radius:14px; border:1px solid ">
             </div>
 
             <div>
-                <label style="display:block; margin-bottom:6px; color:rgba(255,255,255,0.75);">Description</label>
+                <label style="display:block; margin-bottom:6px; ">Description</label>
                 <textarea name="description" rows="4"
-                    style="width:100%; padding:12px; border-radius:14px; border:1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.06); color:white;">{{ old('description', $perfume->description) }}</textarea>
+                    style="width:100%; padding:12px; border-radius:14px; border:1px solid ">{{ old('description', $perfume->description) }}</textarea>
             </div>
 
-            <label style="display:flex; gap:10px; align-items:center; color:rgba(255,255,255,0.8);">
+            <label style="display:flex; gap:10px; align-items:center; ">
                 <input type="checkbox" name="is_active" value="1" {{ old('is_active', $perfume->is_active) ? 'checked' :
                 '' }}>
                 Active

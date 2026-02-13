@@ -24,8 +24,9 @@
         <div style="margin-top:14px; overflow:auto;">
             <table style="width:100%; border-collapse:collapse;">
                 <thead>
-                    <tr style="text-align:left; color:rgba(255,255,255,0.7);">
+                    <tr style="text-align:left;">
                         <th style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.10);">Name</th>
+                        {{-- <th style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.10);">email</th> --}}
                         <th style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.10);">Code</th>
                         <th style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.10);">Status</th>
                         <th style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.10);">Action</th>
@@ -35,6 +36,7 @@
                     @forelse($branches as $b)
                     <tr>
                         <td style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.06);">{{ $b->name }}</td>
+                        {{-- <td style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.06);">{{ $b->user->email }}</td> --}}
                         <td style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.06);">{{ $b->code }}</td>
                         <td style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.06);">
                             {{ $b->is_active ? 'Active' : 'Disabled' }}

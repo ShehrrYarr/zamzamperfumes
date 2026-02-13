@@ -30,42 +30,42 @@
             @csrf
 
             <div>
-                <label style="display:block; margin-bottom:6px; color:rgba(255,255,255,0.75);">Name</label>
+                <label style="display:block; margin-bottom:6px;">Name</label>
                 <input name="name" value="{{ old('name') }}" required
-                    style="width:100%; padding:12px; border-radius:14px; border:1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.06); color:white;">
+                    style="width:100%; padding:12px; border-radius:14px; border:1px solid ">
             </div>
 
             <div>
-                <label style="display:block; margin-bottom:6px; color:rgba(255,255,255,0.75);">Email</label>
+                <label style="display:block; margin-bottom:6px;">Email</label>
                 <input type="email" name="email" value="{{ old('email') }}" required
-                    style="width:100%; padding:12px; border-radius:14px; border:1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.06); color:white;">
+                    style="width:100%; padding:12px; border-radius:14px; border:1px solid ">
             </div>
             <div class="card" style="margin-top:12px;">
                 <div class="h1" style="font-size:16px;">Salary Settings</div>
                 <p class="muted">Enter Monthly salary (recommended). Daily/Hourly will be auto-calculated.</p>
             
                 <div class="grid" style="margin-top:10px;">
-                    <div class="col-6">
+                    <div class="col-12">
                         <label class="muted">Monthly Salary</label>
                         <input type="number" step="0.01" name="monthly_salary"
                             value="{{ old('monthly_salary', $staff->monthly_salary ?? '') }}" class="form-control"
                             >
                     </div>
             
-                    <div class="col-6">
+                    <div class="col-12">
                         <label class="muted">Work Hours / Day</label>
                         <input type="number" name="work_hours_per_day"
                             value="{{ old('work_hours_per_day', $staff->work_hours_per_day ?? 10) }}" class="form-control" min="1"
                             max="24">
                     </div>
             
-                    <div class="col-6">
+                    <div class="col-12">
                         <label class="muted">Daily Salary (auto)</label>
                         <input type="number" step="0.01" name="daily_salary"
                             value="{{ old('daily_salary', $staff->daily_salary ?? '') }}" class="form-control" readonly>
                     </div>
             
-                    <div class="col-6">
+                    <div class="col-12">
                         <label class="muted">Hourly Salary (auto)</label>
                         <input type="number" step="0.01" name="hourly_salary"
                             value="{{ old('hourly_salary', $staff->hourly_salary ?? '') }}" class="form-control" readonly>

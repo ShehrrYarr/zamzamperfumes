@@ -38,8 +38,10 @@ use App\Http\Controllers\Admin\BranchStaffController;
 use App\Http\Controllers\Admin\MainShopController;
 use App\Http\Controllers\Admin\MainShopStaffController;
 use App\Http\Controllers\Branch\StaffController;
+use App\Http\Controllers\Branch\ExpenseController as BranchExpenseController;
 use App\Http\Controllers\MainShop\BranchesController as MainShopBranchesController;
 use App\Http\Controllers\Admin\PerfumeController as AdminPerfumeController;
+use App\Http\Controllers\Admin\AdminExpenseController;
 use App\Http\Controllers\MainShop\PerfumeController as MainPerfumeController;
 use App\Http\Controllers\Admin\BatchController as AdminBatchController;
 use App\Http\Controllers\MainShop\BatchController as MainBatchController;
@@ -47,6 +49,7 @@ use App\Http\Controllers\MainShop\TransferController as MainTransferController;
 use App\Http\Controllers\Branch\TransferClaimController;
 use App\Http\Controllers\Branch\InventoryController;
 use App\Http\Controllers\MainShop\InventoryController as MainInventoryController;
+use App\Http\Controllers\MainShop\MainShop\ExpenseController;
 use App\Http\Controllers\Branch\TransferHistoryController;
 use App\Http\Controllers\POS\MainPosController;
 use App\Http\Controllers\POS\BranchPosController;
@@ -391,9 +394,16 @@ Route::prefix('main')->name('main.')->middleware(['auth'])->group(function () {
     Route::get('/reports/returns', [MainReportsController::class, 'returns'])->name('reports.returns');
 });
 
+Route::get('/main/expenses', [\App\Http\Controllers\MainShop\ExpenseController::class,'index'])->name('main.expenses.index');
+Route::get('/main/expenses/create', [\App\Http\Controllers\MainShop\ExpenseController::class,'create'])->name('main.expenses.create');
+Route::post('/main/expenses', [\App\Http\Controllers\MainShop\ExpenseController::class,'store'])->name('main.expenses.store');
 
 
+Route::get('/branch/expenses', [\App\Http\Controllers\Branch\BranchExpenseController::class,'index'])->name('branch.expenses.index');
+Route::get('/branch/expenses/create', [\App\Http\Controllers\Branch\BranchExpenseController::class,'create'])->name('branch.expenses.create');
+Route::post('/branch/expenses', [\App\Http\Controllers\Branch\BranchExpenseController::class,'store'])->name('branch.expenses.store');
 
+Route::get('/admin/expenses', [\App\Http\Controllers\Admin\AdminExpenseController::class,'index'])->name('admin.expenses.index');
 
 
 

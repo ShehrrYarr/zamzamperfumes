@@ -25,30 +25,30 @@
             @csrf
 
             <div>
-                <label style="display:block; margin-bottom:6px; color:rgba(255,255,255,0.75);">Branch Name</label>
+                <label style="display:block; margin-bottom:6px;  ">Branch Name</label>
                 <input name="name" value="{{ old('name') }}" required
-                    style="width:100%; padding:12px; border-radius:14px; border:1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.06); color:white;">
+                    style="width:100%; padding:12px; border-radius:14px; border:1px solid   ">
             </div>
 
             <div>
-                <label style="display:block; margin-bottom:6px; color:rgba(255,255,255,0.75);">Branch Code
+                <label style="display:block; margin-bottom:6px;  ">Branch Code
                     (unique)</label>
                 <input name="code" value="{{ old('code') }}" required placeholder="BR-001"
-                    style="width:100%; padding:12px; border-radius:14px; border:1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.06); color:white;">
+                    style="width:100%; padding:12px; border-radius:14px; border:1px solid   ">
             </div>
 
             <div>
-                <label style="display:block; margin-bottom:6px; color:rgba(255,255,255,0.75);">Address
+                <label style="display:block; margin-bottom:6px;  ">Address
                     (optional)</label>
                 <input name="address" value="{{ old('address') }}"
-                    style="width:100%; padding:12px; border-radius:14px; border:1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.06); color:white;">
+                    style="width:100%; padding:12px; border-radius:14px; border:1px solid   ">
             </div>
 
             <div>
-                <label style="display:block; margin-bottom:6px; color:rgba(255,255,255,0.75);">Branch Login
+                <label style="display:block; margin-bottom:6px;  ">Branch Login
                     Email</label>
                 <input type="email" name="email" value="{{ old('email') }}" required
-                    style="width:100%; padding:12px; border-radius:14px; border:1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.06); color:white;">
+                    style="width:100%; padding:12px; border-radius:14px; border:1px solid   ">
             </div>
 
             <div style="display:flex; gap:10px; flex-wrap:wrap;">

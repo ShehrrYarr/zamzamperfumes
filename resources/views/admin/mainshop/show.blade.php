@@ -71,7 +71,9 @@
 
             <div class="card" style="background: rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.10);">
                 <div style="font-weight:700; margin-bottom:6px;">Main Shop Login</div>
-                <div class="muted">Email: <span style="color:rgba(255,255,255,0.9)">{{ $mainLogin?->email ?? 'Not found'
+                <div class="muted">Email: <span >{{ $mainLogin?->email ?? 'Not found'
+                        }}</span></div>
+                <div class="muted">Password: <span >{{ $mainLogin?->password_text ?? 'Not found'
                         }}</span></div>
 
                 <form method="POST" action="{{ route('admin.mainshop.reset_login_password') }}"

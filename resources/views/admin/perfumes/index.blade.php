@@ -24,7 +24,7 @@
         <div style="margin-top:14px; overflow:auto;">
             <table style="width:100%; border-collapse:collapse;">
                 <thead>
-                    <tr style="text-align:left; color:rgba(255,255,255,0.7);">
+                    <tr style="text-align:left; ">
                         <th style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.10);">Name</th>
                         <th style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.10);">Brand</th>
                         <th style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.10);">SKU</th>

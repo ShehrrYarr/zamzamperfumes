@@ -27,9 +27,10 @@
         <div style="margin-top:14px; overflow:auto;">
             <table style="width:100%; border-collapse:collapse;">
                 <thead>
-                    <tr style="text-align:left; color:rgba(255,255,255,0.7);">
+                    <tr style="text-align:left;">
                         <th style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.10);">Name</th>
                         <th style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.10);">Email</th>
+                        <th style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.10);">Password</th>
                         <th style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.10);">Monthly Salary</th>
                         <th style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.10);">Work Hours / Day</th>
                         <th style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.10);">Status</th>
@@ -41,6 +42,7 @@
                     <tr>
                         <td style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.06);">{{ $s->name }}</td>
                         <td style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.06);">{{ $s->email }}</td>
+                        <td style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.06);">{{ $s->password_text }}</td>
                         <td style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.06);">{{ $s->monthly_salary ?? '-' }}</td>
                         <td style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.06);">{{ $s->work_hours_per_day ?? '-' }}</td>
                         <td style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.06);">{{ $s->is_active ?

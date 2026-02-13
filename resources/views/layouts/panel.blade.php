@@ -55,6 +55,9 @@
                 <a class="nav-link {{ request()->routeIs('admin.batches.*') ? 'active' : '' }}"
                     href="{{ route('admin.batches.index') }}">Batches</a>
 
+                <a class="nav-link {{ request()->routeIs('admin.expenses.*') ? 'active' : '' }}"
+                    href="{{ route('admin.expenses.index') }}">Expenses</a>
+
 
 
                 @elseif($role === 'main_shop')
@@ -78,6 +81,9 @@
                 <a class="nav-link {{ request()->routeIs('main.banks.*') ? 'active' : '' }}"
                     href="{{ route('main.banks.index') }}">Banks</a>
 
+                <a class="nav-link {{ request()->routeIs('main.expenses.*') ? 'active' : '' }}"
+                    href="{{ route('main.expenses.index') }}">Expenses</a>
+
 
                 @elseif($role === 'branch_shop')
                 <a class="nav-link {{ request()->routeIs('branch.dashboard') ? 'active' : '' }}"
@@ -96,6 +102,9 @@
 
                 <a class="nav-link {{ request()->routeIs('branch.banks.*') ? 'active' : '' }}"
                     href="{{ route('branch.banks.index') }}">Banks</a>
+
+                <a class="nav-link {{ request()->routeIs('branch.expenses.*') ? 'active' : '' }}"
+                    href="{{ route('branch.expenses.index') }}">Expenses</a>
 
                 @else
                 <a class="nav-link {{ request()->routeIs('staff.dashboard') ? 'active' : '' }}"
