@@ -29,25 +29,25 @@
                 @csrf
 
                 <div>
-                    <label style="display:block; margin-bottom:6px; color:rgba(255,255,255,0.75);">Name</label>
+                    <label style="display:block; margin-bottom:6px;  ">Name</label>
                     <input name="name" required
                         style="width:100%; padding:12px; border-radius:14px; border:1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.06); color:white;">
                 </div>
 
                 <div>
-                    <label style="display:block; margin-bottom:6px; color:rgba(255,255,255,0.75);">Code</label>
+                    <label style="display:block; margin-bottom:6px;  ">Code</label>
                     <input name="code" required placeholder="MAIN-001"
                         style="width:100%; padding:12px; border-radius:14px; border:1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.06); color:white;">
                 </div>
 
                 <div>
-                    <label style="display:block; margin-bottom:6px; color:rgba(255,255,255,0.75);">Address</label>
+                    <label style="display:block; margin-bottom:6px;  ">Address</label>
                     <input name="address"
                         style="width:100%; padding:12px; border-radius:14px; border:1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.06); color:white;">
                 </div>
 
                 <div>
-                    <label style="display:block; margin-bottom:6px; color:rgba(255,255,255,0.75);">Main Shop Login
+                    <label style="display:block; margin-bottom:6px;  ">Main Shop Login
                         Email</label>
                     <input type="email" name="email" required
                         style="width:100%; padding:12px; border-radius:14px; border:1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.06); color:white;">
