@@ -19,4 +19,9 @@ class Sale extends Model
     public function payments(){ return $this->hasMany(\App\Models\Payment::class); }
     public function shop(){ return $this->belongsTo(\App\Models\Shop::class); }
     public function user(){ return $this->belongsTo(\App\Models\User::class); }
+    public function bank()
+{
+    return $this->belongsTo(\App\Models\Bank::class, 'bank_id');
+}
+
 }

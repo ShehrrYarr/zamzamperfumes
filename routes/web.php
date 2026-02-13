@@ -57,6 +57,7 @@ use App\Http\Controllers\Admin\AdminReportsController;
 use App\Http\Controllers\Staff\AttendanceScanController;
 use App\Http\Controllers\Staff\StaffAttendanceController;
 use App\Http\Controllers\Reports\SalaryReportController;
+use App\Http\Controllers\Main\MainReportsController;
 
 Auth::routes();
 Route::post('/logout-user/{user}', [UserController::class, 'logoutUser'])->name('logoutUser');
@@ -380,6 +381,15 @@ Route::middleware(['auth'])->group(function () {
         ->name('branch.reports.salaries');
 });
 
+
+
+
+
+Route::prefix('main')->name('main.')->middleware(['auth'])->group(function () {
+    Route::get('/reports/batches', [MainReportsController::class, 'batches'])->name('reports.batches');
+    Route::get('/reports/sales',   [MainReportsController::class, 'sales'])->name('reports.sales');
+    Route::get('/reports/returns', [MainReportsController::class, 'returns'])->name('reports.returns');
+});
 
 
 
