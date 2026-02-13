@@ -10,20 +10,32 @@ class ReceiptController extends Controller
 {
     private function currentShopOrFail(): Shop
     {
-        $shop = Shop::find(auth()->user()->shop_id);
+        abort_if(!auth()->check(), 403);
+
+        $shopId = (int) auth()->user()->shop_id;
+        abort_if(!$shopId, 403);
+
+        $shop = Shop::find($shopId);
         abort_if(!$shop, 403);
+
         abort_if(!in_array($shop->type, ['main','branch'], true), 403);
+
         return $shop;
     }
 
-    public function show(Sale $sale)
+    // NOTE: $sale is the ID from route (no implicit binding)
+    public function show($sale)
     {
         $shop = $this->currentShopOrFail();
 
-        // Ensure user can only view receipts for their own shop
-        abort_if($sale->shop_id !== $shop->id, 403);
+        $saleId = (int) $sale;
 
-        $sale->load(['items', 'payments.bank', 'user', 'shop']);
+        // Ensure user can only view receipts for their own shop
+        $sale = Sale::query()
+            ->where('id', $saleId)
+            ->where('shop_id', $shop->id)
+            ->with(['items', 'payments.bank', 'user', 'shop'])
+            ->firstOrFail();
 
         return view('pos.receipt', compact('sale', 'shop'));
     }
