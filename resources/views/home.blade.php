@@ -8,7 +8,7 @@
 
     <title>Zam Zam Perfumes</title>
     <link rel="icon" href="homepage_assets/img/AZT.png" src="homepage_assets/img/image1.jpg" type="image/x-icon">
-
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
     <meta name="description" content="Creative Agency, Portfolio, Corporate, Startup & Technology">
     <meta name="subject" content="Creative Agency, Portfolio, Corporate, Startup & Technology">
@@ -326,10 +326,11 @@
                                         <a href="https://www.facebook.com/share/1DM8acoxud/?mibextid=wwXIfr" class="nav-link"><i
                                                 class="icon-social-facebook"></i></a>
                                     </li>
-                                    <li class="nav-item">
-                                        <a href="https://www.tiktok.com/@zamzamperfumesbahawalpu1"
-                                            class="nav-link"><i class="bi bi-tiktok"></i></a>
-                                    </li>
+                                   <li class="nav-item">
+                                    <a href="https://www.tiktok.com/yourprofile" class="nav-link">
+                                        <i class="fab fa-tiktok"></i>
+                                    </a>
+                                </li>
                                     
                                 </ul>
                             </div>
