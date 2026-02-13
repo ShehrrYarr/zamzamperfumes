@@ -327,7 +327,7 @@
                                             class="nav-link"><i class="icon-social-facebook"></i></a>
                                     </li>
                                     <li class="nav-item">
-                                        <a href="www.tiktok.com/@zamzamperfumesbahawalpu1" class="nav-link">
+                                        <a href="https://www.tiktok.com/@zamzamperfumesbahawalpu1" class="nav-link">
                                             <i class="fab fa-tiktok"></i>
                                         </a>
                                     </li>
