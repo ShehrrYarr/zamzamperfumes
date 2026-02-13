@@ -323,17 +323,14 @@
                                 <ul class="navbar-nav social share-list mt-0 ml-auto">
 
                                     <li class="nav-item">
-                                        <a href="https://www.facebook.com/Safdrmobshop" class="nav-link"><i
+                                        <a href="https://www.facebook.com/share/1DM8acoxud/?mibextid=wwXIfr" class="nav-link"><i
                                                 class="icon-social-facebook"></i></a>
                                     </li>
                                     <li class="nav-item">
-                                        <a href="https://www.tiktok.com/@malikarshad999?_t=8cwQWucSZjG&_r=1"
+                                        <a href="https://www.tiktok.com/@zamzamperfumesbahawalpu1"
                                             class="nav-link"><i class="bi bi-tiktok"></i></a>
                                     </li>
-                                    <li class="nav-item">
-                                        <a href="https://chat.whatsapp.com/DDm8P66zpd0HNPksncsRcJ" class="nav-link"><i
-                                                class="bi bi-whatsapp"></i></a>
-                                    </li>
+                                    
                                 </ul>
                             </div>
                         </div>
@@ -358,34 +355,24 @@
                                 </ul>
                             </div> --}}
 
-                            <div class="col-12 col-lg-4 p-3 text-center text-lg-left item">
+                            <div class="col-12 col-lg-5 p-3 text-center text-lg-left item">
                                 <h4 class="title">Get in Touch</h4>
                                 <ul class="navbar-nav">
                                     <li class="nav-item">
                                         <a href="#" class="nav-link">
                                             <i class="icon-phone mr-2"></i>
-                                            +923007852629
+                                            03007852629 - 03075766855
 
                                         </a>
                                     </li>
+                                   
                                     <li class="nav-item">
                                         <a href="#" class="nav-link">
                                             <i class="icon-phone mr-2"></i>
-                                            +923127852629
+                                            03009218003 - 03025066267
                                         </a>
                                     </li>
-                                    <li class="nav-item">
-                                        <a href="#" class="nav-link">
-                                            <i class="icon-envelope mr-2"></i>
-                                            hello@business.com
-                                        </a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a href="#" class="nav-link">
-                                            <i class="icon-location-pin mr-2"></i>
-                                            Office Street, 123
-                                        </a>
-                                    </li>
+                                   
 
                                 </ul>
                             </div>
