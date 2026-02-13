@@ -287,7 +287,8 @@
             <div class="receipt">
 
                 <p class="brand">Zam Zam Perfumes BWP</p>
-                <p class="contacts">+92 300 9218003, +92 300 7852629, +92 302 5066267</p>
+                <p class="contacts">Main Branch LandLine # 062-3096493 </p>
+                <p class="contacts">Dubai Chowk, Orion Tower Bahawalpur </p>
                 <p class="subhead">OFFICIAL SALES RECEIPT</p>
 
                 <div class="divider"></div>
@@ -411,11 +412,23 @@
                 </div>
 
                 <div class="divider"></div>
+                
+                <div class="footer">
+                    For Complaints & Online order<br>
+                    03075766855-
+                    03007852629 <br>
+                    03009218003-
+                    03025066267
+                
+                </div>
+
+                <div class="divider"></div>
 
                 <div class="footer">
                     THANK YOU FOR YOUR PURCHASE<br>
                     — HAVE A NICE DAY —
                 </div>
+             
 
             </div>
         </div>
