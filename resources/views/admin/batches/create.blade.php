@@ -28,7 +28,7 @@
             @csrf
 
             <div>
-                <label style="display:block; margin-bottom:6px; color:rgba(255,255,255,0.75);">Perfume</label>
+                <label style="display:block; margin-bottom:6px;">Perfume</label>
                 <select name="perfume_id" required
                     style="width:100%; padding:12px; border-radius:14px; border:1px solid rgba(255,255,255,0.14); background: rgba(15,20,35,0.65); color:white;">
                     <option value="">Select perfume</option>
@@ -42,45 +42,45 @@
 
             <div class="grid">
                 <div class="col-6">
-                    <label style="display:block; margin-bottom:6px; color:rgba(255,255,255,0.75);">Batch No
+                    <label style="display:block; margin-bottom:6px; ">Batch No
                         (optional)</label>
                     <input name="batch_no" value="{{ old('batch_no') }}"
-                        style="width:100%; padding:12px; border-radius:14px; border:1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.06); color:white;">
+                        style="width:100%; padding:12px; border-radius:14px;">
                 </div>
                 <div class="col-6">
-                    <label style="display:block; margin-bottom:6px; color:rgba(255,255,255,0.75);">Quantity</label>
+                    <label style="display:block; margin-bottom:6px; ;">Quantity</label>
                     <input type="number" name="quantity" min="0" required value="{{ old('quantity', 0) }}"
-                        style="width:100%; padding:12px; border-radius:14px; border:1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.06); color:white;">
+                        style="width:100%; padding:12px; border-radius:14px; border:1px solid ">
                 </div>
             </div>
 
             <div class="grid">
                 <div class="col-6">
-                    <label style="display:block; margin-bottom:6px; color:rgba(255,255,255,0.75);">Cost Price
+                    <label style="display:block; margin-bottom:6px; ">Cost Price
                         (optional)</label>
                     <input type="number" step="0.01" min="0" name="cost_price" value="{{ old('cost_price') }}"
-                        style="width:100%; padding:12px; border-radius:14px; border:1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.06); color:white;">
+                        style="width:100%; padding:12px; border-radius:14px; border:1px solid ">
                 </div>
                 <div class="col-6">
-                    <label style="display:block; margin-bottom:6px; color:rgba(255,255,255,0.75);">Sell Price
+                    <label style="display:block; margin-bottom:6px;">Sell Price
                         (optional)</label>
                     <input type="number" step="0.01" min="0" name="sell_price" value="{{ old('sell_price') }}"
-                        style="width:100%; padding:12px; border-radius:14px; border:1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.06); color:white;">
+                        style="width:100%; padding:12px; border-radius:14px; border:1px solid">
                 </div>
             </div>
 
             <div class="grid">
                 <div class="col-6">
-                    <label style="display:block; margin-bottom:6px; color:rgba(255,255,255,0.75);">MFG Date
+                    <label style="display:block; margin-bottom:6px;">MFG Date
                         (optional)</label>
                     <input type="date" name="mfg_date" value="{{ old('mfg_date') }}"
-                        style="width:100%; padding:12px; border-radius:14px; border:1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.06); color:white;">
+                        style="width:100%; padding:12px; border-radius:14px; border:1px solid ">
                 </div>
                 <div class="col-6">
-                    <label style="display:block; margin-bottom:6px; color:rgba(255,255,255,0.75);">EXP Date
+                    <label style="display:block; margin-bottom:6px;">EXP Date
                         (optional)</label>
                     <input type="date" name="exp_date" value="{{ old('exp_date') }}"
-                        style="width:100%; padding:12px; border-radius:14px; border:1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.06); color:white;">
+                        style="width:100%; padding:12px; border-radius:14px; border:1px solid">
                 </div>
             </div>
 
