@@ -406,6 +406,16 @@ Route::post('/branch/expenses', [\App\Http\Controllers\Branch\BranchExpenseContr
 Route::get('/admin/expenses', [\App\Http\Controllers\Admin\AdminExpenseController::class,'index'])->name('admin.expenses.index');
 
 
+Route::patch('/admin/batches/{batch}/update-quantity',
+    [AdminBatchController::class, 'updateQuantity']
+)->name('admin.batches.update_quantity');
+
+Route::get('/admin/batches/{batch}/edit-qty', [AdminBatchController::class, 'editQty'])
+    ->name('admin.batches.edit_qty');
+
+Route::patch('/admin/batches/{batch}/update-qty', [AdminBatchController::class, 'updateQty'])
+    ->name('admin.batches.update_qty');
+
 
 
 

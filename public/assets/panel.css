@@ -419,5 +419,4 @@ body{
   .col-6,.col-4,.col-3{ grid-column: span 12; }
 }
 
-/* Smooth */
-a, button{ transition: all .15s ease; }
+

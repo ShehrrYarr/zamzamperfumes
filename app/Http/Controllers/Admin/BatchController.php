@@ -11,18 +11,59 @@ use Illuminate\Support\Facades\DB;
 
 class BatchController extends Controller
 {
-    public function index()
-    {
-        $mainShop = Shop::where('type', 'main')->first();
-        abort_if(!$mainShop, 404, 'Main shop not found.');
 
-        $batches = Batch::with('perfume')
-            ->where('shop_id', $mainShop->id)
-            ->orderByDesc('id')
-            ->get();
 
-        return view('admin.batches.index', compact('batches', 'mainShop'));
+
+private function assertAdmin(): void
+{
+    abort_if(!auth()->check(), 403);
+    abort_if(auth()->user()->role !== 'admin', 403);
+}
+
+
+   public function index(Request $request)
+{
+    $mainShop = Shop::where('type', 'main')->first();
+    abort_if(!$mainShop, 404, 'Main shop not found.');
+
+    $q = trim((string)$request->query('q', ''));
+
+    $batchesQ = Batch::query()
+        ->with('perfume')
+        ->where('shop_id', $mainShop->id)
+        ->when($q !== '', function ($qq) use ($q) {
+            // barcode search (contains)
+            $qq->where('barcode', 'like', "%{$q}%");
+        })
+        ->orderByDesc('id');
+
+    // ✅ If ajax request, return JSON so table can update live
+    if ($request->wantsJson()) {
+        $rows = $batchesQ->limit(200)->get()->map(function ($b) {
+            return [
+                'id' => $b->id,
+                'barcode' => $b->barcode,
+                'perfume' => $b->perfume?->name ?? '—',
+                'quantity' => (int)$b->quantity,
+                'sell_price' => $b->sell_price,
+                'cost_price' => $b->cost_price,
+                'print_url' => route('admin.batches.print', $b->id),
+                // ✅ edit page (you will create this route/page)
+                'edit_url' => route('admin.batches.edit_qty', $b->id),
+            ];
+        });
+
+        return response()->json([
+            'ok' => true,
+            'rows' => $rows,
+        ]);
     }
+
+    // Normal page load
+    $batches = $batchesQ->get();
+
+    return view('admin.batches.index', compact('batches', 'mainShop', 'q'));
+}
 
     public function create()
     {
@@ -90,5 +131,47 @@ class BatchController extends Controller
 
     return view('shared.batches.print', compact('batch', 'w', 'h'));
 }
+
+
+
+public function editQty(Batch $batch)
+{
+    $this->assertAdmin();
+
+    // Only allow editing MAIN shop batches (since this page is for admin main inventory)
+    $mainShop = Shop::where('type', 'main')->first();
+    abort_if(!$mainShop, 404, 'Main shop not found.');
+
+    abort_if((int)$batch->shop_id !== (int)$mainShop->id, 403, 'You can only edit main shop batches.');
+
+    $batch->load('perfume');
+
+    return view('admin.batches.edit_qty', compact('batch', 'mainShop'));
+}
+
+public function updateQty(Request $request, Batch $batch)
+{
+    $this->assertAdmin();
+
+    $mainShop = Shop::where('type', 'main')->first();
+    abort_if(!$mainShop, 404, 'Main shop not found.');
+    abort_if((int)$batch->shop_id !== (int)$mainShop->id, 403, 'You can only edit main shop batches.');
+
+    $data = $request->validate([
+        'quantity' => ['required', 'integer', 'min:0'],
+        'note'     => ['nullable', 'string', 'max:255'], // optional
+    ]);
+
+    // Update quantity
+    $batch->quantity = (int)$data['quantity'];
+    $batch->save();
+
+    // (Optional) If you later want audit logs, we’ll store this in a separate table.
+
+    return redirect()
+        ->route('admin.batches.index')
+        ->with('success', "Quantity updated for barcode {$batch->barcode}.");
+}
+
 
 }
