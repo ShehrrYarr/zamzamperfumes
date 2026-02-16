@@ -58,85 +58,103 @@ class AdminReportsController extends Controller
         return view('admin.reports.batches', compact('batches', 'totals', 'shops'));
     }
 
-    public function sales(Request $request)
-    {
-        $this->assertAdmin();
+   public function sales(Request $request)
+{
+    $this->assertAdmin();
 
-        $shops = Shop::orderBy('type')->orderBy('name')->get();
+    $shops = Shop::orderBy('type')->orderBy('name')->get();
 
-        // Base sales query (no joins that cause GROUP BY issues)
-        $salesQ = Sale::query()
-            ->with(['shop', 'user'])
-            ->orderByDesc('sales.id');
+    // Base sales query (no joins that cause GROUP BY issues)
+    $salesQ = Sale::query()
+        ->with(['shop', 'user']) // items are loaded after pagination to avoid heavy joins
+        ->orderByDesc('sales.id');
 
-        if ($request->filled('shop_id')) {
-            $salesQ->where('sales.shop_id', (int)$request->shop_id);
-        }
-        if ($request->filled('from')) {
-            $salesQ->whereDate('sales.created_at', '>=', $request->from);
-        }
-        if ($request->filled('to')) {
-            $salesQ->whereDate('sales.created_at', '<=', $request->to);
-        }
-        if ($request->filled('status')) {
-            $salesQ->where('sales.status', $request->status);
-        }
-
-        // ✅ STRICT-SAFE cost subquery grouped by sale_id
-        $costSub = DB::table('sale_items')
-            ->join('batches', 'batches.id', '=', 'sale_items.batch_id')
-            ->join('sales as s', 's.id', '=', 'sale_items.sale_id')
-            ->whereColumn('batches.shop_id', 's.shop_id') // safety
-            ->selectRaw('sale_items.sale_id as sale_id')
-            ->selectRaw('COALESCE(SUM(sale_items.quantity * COALESCE(batches.cost_price,0)),0) as cost_total')
-            ->groupBy('sale_items.sale_id');
-
-        // Join costSub to sales list
-        $q = (clone $salesQ)
-            ->leftJoinSub($costSub, 'c', function ($join) {
-                $join->on('c.sale_id', '=', 'sales.id');
-            })
-            ->select('sales.*')
-            ->selectRaw('COALESCE(c.cost_total,0) as cost_total');
-
-        $sales = $q->paginate(25)->withQueryString();
-
-        // ✅ STRICT-SAFE totals (no GROUP BY / no DISTINCT hacks)
-        $totalsBase = (clone $salesQ)->reorder();
-
-        $totals = (object)[
-            'sales_count'   => (int) (clone $totalsBase)->count(),
-            'revenue_total' => (float) (clone $totalsBase)->sum('grand_total'),
-            'cost_total'    => 0.0,
-        ];
-
-        // Total cost across filtered sales (apply same filters through joining sales)
-        $costTotalQ = DB::table('sale_items')
-            ->join('batches', 'batches.id', '=', 'sale_items.batch_id')
-            ->join('sales', 'sales.id', '=', 'sale_items.sale_id')
-            ->whereColumn('batches.shop_id', 'sales.shop_id');
-
-        if ($request->filled('shop_id')) {
-            $costTotalQ->where('sales.shop_id', (int)$request->shop_id);
-        }
-        if ($request->filled('from')) {
-            $costTotalQ->whereDate('sales.created_at', '>=', $request->from);
-        }
-        if ($request->filled('to')) {
-            $costTotalQ->whereDate('sales.created_at', '<=', $request->to);
-        }
-        if ($request->filled('status')) {
-            $costTotalQ->where('sales.status', $request->status);
-        }
-
-        $totals->cost_total = (float) $costTotalQ
-            ->selectRaw('COALESCE(SUM(sale_items.quantity * COALESCE(batches.cost_price,0)),0) as cost_total')
-            ->value('cost_total');
-
-        $profit = (float)$totals->revenue_total - (float)$totals->cost_total;
-
-        return view('admin.reports.sales', compact('sales', 'totals', 'profit', 'shops'));
+    if ($request->filled('shop_id')) {
+        $salesQ->where('sales.shop_id', (int)$request->shop_id);
     }
+    if ($request->filled('from')) {
+        $salesQ->whereDate('sales.created_at', '>=', $request->from);
+    }
+    if ($request->filled('to')) {
+        $salesQ->whereDate('sales.created_at', '<=', $request->to);
+    }
+    if ($request->filled('status')) {
+        $salesQ->where('sales.status', $request->status);
+    }
+
+    // ✅ STRICT-SAFE cost subquery grouped by sale_id
+    $costSub = DB::table('sale_items')
+        ->join('batches', 'batches.id', '=', 'sale_items.batch_id')
+        ->join('sales as s', 's.id', '=', 'sale_items.sale_id')
+        ->whereColumn('batches.shop_id', 's.shop_id') // safety
+        ->selectRaw('sale_items.sale_id as sale_id')
+        ->selectRaw('COALESCE(SUM(sale_items.quantity * COALESCE(batches.cost_price,0)),0) as cost_total')
+        ->groupBy('sale_items.sale_id');
+
+    // Apply SAME filters to the cost subquery via joined sales alias "s"
+    if ($request->filled('shop_id')) {
+        $costSub->where('s.shop_id', (int)$request->shop_id);
+    }
+    if ($request->filled('from')) {
+        $costSub->whereDate('s.created_at', '>=', $request->from);
+    }
+    if ($request->filled('to')) {
+        $costSub->whereDate('s.created_at', '<=', $request->to);
+    }
+    if ($request->filled('status')) {
+        $costSub->where('s.status', $request->status);
+    }
+
+    // Join costSub to sales list
+    $q = (clone $salesQ)
+        ->leftJoinSub($costSub, 'c', function ($join) {
+            $join->on('c.sale_id', '=', 'sales.id');
+        })
+        ->select('sales.*')
+        ->selectRaw('COALESCE(c.cost_total,0) as cost_total');
+
+    $sales = $q->paginate(25)->withQueryString();
+
+    // ✅ Load items for dropdown (after pagination, so we don't break strict SQL)
+    $sales->getCollection()->load(['items']); // Sale::items (SaleItem)
+
+    // ✅ STRICT-SAFE totals (no GROUP BY / no DISTINCT hacks)
+    $totalsBase = (clone $salesQ)->reorder();
+
+    $totals = (object)[
+        'sales_count'   => (int) (clone $totalsBase)->count(),
+        'revenue_total' => (float) (clone $totalsBase)->sum('grand_total'),
+        'cost_total'    => 0.0,
+    ];
+
+    // Total cost across filtered sales (apply same filters through joining sales)
+    $costTotalQ = DB::table('sale_items')
+        ->join('batches', 'batches.id', '=', 'sale_items.batch_id')
+        ->join('sales', 'sales.id', '=', 'sale_items.sale_id')
+        ->whereColumn('batches.shop_id', 'sales.shop_id');
+
+    if ($request->filled('shop_id')) {
+        $costTotalQ->where('sales.shop_id', (int)$request->shop_id);
+    }
+    if ($request->filled('from')) {
+        $costTotalQ->whereDate('sales.created_at', '>=', $request->from);
+    }
+    if ($request->filled('to')) {
+        $costTotalQ->whereDate('sales.created_at', '<=', $request->to);
+    }
+    if ($request->filled('status')) {
+        $costTotalQ->where('sales.status', $request->status);
+    }
+
+    $totals->cost_total = (float) $costTotalQ
+        ->selectRaw('COALESCE(SUM(sale_items.quantity * COALESCE(batches.cost_price,0)),0) as cost_total')
+        ->value('cost_total');
+
+    $profit = (float)$totals->revenue_total - (float)$totals->cost_total;
+
+    return view('admin.reports.sales', compact('sales', 'totals', 'profit', 'shops'));
+}
+
 
     public function returns(Request $request)
     {
