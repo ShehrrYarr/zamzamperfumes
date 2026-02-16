@@ -12,7 +12,7 @@ class Sale extends Model
         'shop_id','user_id',
         'customer_name','customer_phone',
         'subtotal','discount_type','discount_value','discount_amount','grand_total',
-        'status'
+        'status','bank_id'
     ];
 
     public function items(){ return $this->hasMany(\App\Models\SaleItem::class); }

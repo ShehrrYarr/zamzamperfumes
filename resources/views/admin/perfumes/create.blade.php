@@ -16,7 +16,7 @@
 
         @if ($errors->any())
         <div
-            style="margin-top:14px; padding:12px; border-radius:14px; background: rgba(255,0,90,0.10); border:1px solid rgba(255,0,90,0.25);">
+            style="margin-top:14px; padding:12px; border-radius:14px; ">
             <ul style="margin:0; padding-left:18px;">
                 @foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach
             </ul>
@@ -29,27 +29,27 @@
 
             <div class="grid">
                 <div class="col-6">
-                    <label style="display:block; margin-bottom:6px; color:rgba(255,255,255,0.75);">Name</label>
+                    <label style="display:block; margin-bottom:6px; ">Name</label>
                     <input name="name" required value="{{ old('name') }}"
-                        style="width:100%; padding:12px; border-radius:14px; border:1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.06); color:white;">
+                        style="width:100%; padding:12px; border-radius:14px; border:1px solid ">
                 </div>
                 <div class="col-6">
-                    <label style="display:block; margin-bottom:6px; color:rgba(255,255,255,0.75);">Brand</label>
+                    <label style="display:block; margin-bottom:6px; ">Brand</label>
                     <input name="brand" value="{{ old('brand') }}"
-                        style="width:100%; padding:12px; border-radius:14px; border:1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.06); color:white;">
+                        style="width:100%; padding:12px; border-radius:14px; border:1px solid ">
                 </div>
             </div>
 
             <div>
-                <label style="display:block; margin-bottom:6px; color:rgba(255,255,255,0.75);">SKU (optional)</label>
+                <label style="display:block; margin-bottom:6px; ">SKU (optional)</label>
                 <input name="sku" value="{{ old('sku') }}"
-                    style="width:100%; padding:12px; border-radius:14px; border:1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.06); color:white;">
+                    style="width:100%; padding:12px; border-radius:14px; border:1px solid ">
             </div>
 
             <div>
-                <label style="display:block; margin-bottom:6px; color:rgba(255,255,255,0.75);">Description</label>
+                <label style="display:block; margin-bottom:6px; ">Description</label>
                 <textarea name="description" rows="4"
-                    style="width:100%; padding:12px; border-radius:14px; border:1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.06); color:white;">{{ old('description') }}</textarea>
+                    style="width:100%; padding:12px; border-radius:14px; border:1px solid ">{{ old('description') }}</textarea>
             </div>
 
             <div style="display:flex; gap:10px; flex-wrap:wrap;">
