@@ -54,7 +54,7 @@
                 </label>
                 <input type="number" name="quantity" min="0" required
                     value="{{ old('quantity', (int)$batch->quantity) }}"
-                    style="width:100%; padding:12px; border-radius:14px; border:1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.06);">
+                    style="width:100%; padding:12px; border-radius:14px; border:1px solid">
                 <div class="muted" style="margin-top:6px; font-size:12px;">
                     Set exact quantity. (0 allowed)
                 </div>
