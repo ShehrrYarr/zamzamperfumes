@@ -383,19 +383,17 @@ body{
 }
 
 /* =========================================================
-   Mobile overlay (prevents click issues)
-   Add <div class="sidebar-overlay" id="sidebarOverlay"></div>
-   after the sidebar in layouts.panel.blade.php
+   Mobile overlay (FIXED)
+   Works with your current HTML where #sidebarOverlay is INSIDE <aside>.
    ========================================================= */
 .sidebar-overlay{
   position: fixed;
-  top:0; right:0; bottom:0;
-  left: var(--sidebar-w);
+  inset: 0;                 /* cover whole screen */
   background: rgba(15,23,42,0.22);
-  opacity:0;
-  pointer-events:none;
+  opacity: 0;
+  pointer-events: none;
   transition: opacity .2s ease;
-  z-index: 2400;
+  z-index: 2400;            /* below sidebar (2500), above content */
 }
 
 @media (max-width: 992px){
@@ -410,13 +408,13 @@ body{
   .app[data-sidebar="open"] .sidebar{
     transform: translateX(0);
   }
+
+  /* show overlay when open */
   .app[data-sidebar="open"] .sidebar-overlay{
-    opacity:1;
-    pointer-events:auto;
+    opacity: 1;
+    pointer-events: auto;
   }
 
   .main{ margin-left:0 !important; }
   .col-6,.col-4,.col-3{ grid-column: span 12; }
 }
-
-

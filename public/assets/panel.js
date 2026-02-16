@@ -2,6 +2,7 @@
   const app = document.querySelector('.app');
   const btn = document.getElementById('sidebarToggle');
   const overlay = document.getElementById('sidebarOverlay');
+  const sidebar = document.getElementById('sidebar');
 
   if (!app || !btn) return;
 
@@ -41,6 +42,15 @@
   // Clicking overlay closes sidebar (mobile)
   if (overlay) {
     overlay.addEventListener('click', () => setState('collapsed'));
+  }
+
+  // ✅ NEW: clicking any nav link closes sidebar on mobile
+  if (sidebar) {
+    sidebar.addEventListener('click', (e) => {
+      if (!isMobile()) return;
+      const a = e.target.closest('a');
+      if (a) setState('collapsed');
+    });
   }
 
   // When switching between mobile/desktop, apply correct behavior
