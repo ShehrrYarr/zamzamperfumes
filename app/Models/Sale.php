@@ -12,7 +12,9 @@ class Sale extends Model
         'shop_id','user_id',
         'customer_name','customer_phone',
         'subtotal','discount_type','discount_value','discount_amount','grand_total',
-        'status','bank_id'
+        'status','bank_id','sale_type',
+'related_shop_id',
+'transfer_id',
     ];
 
     public function items(){ return $this->hasMany(\App\Models\SaleItem::class); }
@@ -22,6 +24,16 @@ class Sale extends Model
     public function bank()
 {
     return $this->belongsTo(\App\Models\Bank::class, 'bank_id');
+}
+
+public function relatedShop()
+{
+    return $this->belongsTo(\App\Models\Shop::class, 'related_shop_id');
+}
+
+public function transfer()
+{
+    return $this->belongsTo(\App\Models\BatchTransfer::class, 'transfer_id');
 }
 
 }
