@@ -54,7 +54,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="5" style="padding:12px; color:rgba(255,255,255,0.65);">No batches yet.</td>
+                        <td colspan="5" style="padding:12px; ">No batches yet.</td>
                     </tr>
                     @endforelse
                 </tbody>

@@ -15,18 +15,22 @@ use Throwable;
 
 class PartialReturnController extends Controller
 {
-    private function currentShopOrFail(): Shop
-    {
-        $shop = Shop::find(auth()->user()->shop_id);
-        abort_if(!$shop, 403);
-        abort_if(!in_array($shop->type, ['main','branch'], true), 403);
-        return $shop;
-    }
+   private function currentShopOrFail(): Shop
+{
+    $shop = Shop::find(auth()->user()->shop_id);
+
+    abort_if(!$shop, 403, 'Shop not found for current user.');
+    abort_if(!in_array($shop->type, ['main','branch'], true), 403, 'Invalid shop type: '.$shop->type);
+
+    return $shop;
+}
+
 
     public function sale(Sale $sale)
     {
         $shop = $this->currentShopOrFail();
-        abort_if($sale->shop_id !== $shop->id, 403);
+        
+        abort_if($sale->shop_id !== $shop->id, 403, "Sale #{$sale->id} does not belong to this shop.");
 
         $sale->load(['items', 'payments.bank']);
 

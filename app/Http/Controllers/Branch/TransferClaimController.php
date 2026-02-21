@@ -275,16 +275,7 @@ class TransferClaimController extends Controller
         return $sale;
     }
 
-    /**
-     * BRANCH -> BRANCH
-     * - sender stock decreased at claim
-     * - receiver stock increased
-     * - cost_price transfers AS-IS
-     * - NO SALE
-     * - account entries (first account per shop):
-     *   - Receiver: DEBIT cost_total
-     *   - Sender: CREDIT cost_total
-     */
+ 
     private function claimFromBranch(BatchTransfer $transfer, Shop $senderBranch, Shop $receiverBranch): void
     {
         // safety: branches only (no main)
