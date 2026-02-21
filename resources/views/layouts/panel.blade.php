@@ -112,6 +112,9 @@
                 <a class="nav-link {{ request()->routeIs('branch.expenses.*') ? 'active' : '' }}"
                     href="{{ route('branch.expenses.index') }}">Expenses</a>
 
+                <a class="nav-link {{ request()->routeIs('branch.accounts.*') ? 'active' : '' }}"
+                    href="{{ route('branch.accounts.index') }}">Accounts</a>
+
                 @else
                 <a class="nav-link {{ request()->routeIs('staff.dashboard') ? 'active' : '' }}"
                     href="{{ route('staff.dashboard') }}">Dashboard</a>

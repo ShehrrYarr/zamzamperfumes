@@ -16,7 +16,7 @@
         <div style="margin-top:14px; overflow:auto;">
             <table style="width:100%; border-collapse:collapse;">
                 <thead>
-                    <tr style="text-align:left; color:rgba(255,255,255,0.7);">
+                    <tr style="text-align:left;">
                         <th style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.10);">Barcode</th>
                         <th style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.10);">Perfume</th>
                         <th style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.10);">Qty</th>
@@ -49,7 +49,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" style="padding:12px; color:rgba(255,255,255,0.65);">No batches in inventory yet.
+                        <td colspan="6" style="padding:12px; ">No batches in inventory yet.
                         </td>
                     </tr>
                     @endforelse

@@ -53,6 +53,7 @@ use App\Http\Controllers\Branch\InventoryController;
 use App\Http\Controllers\MainShop\InventoryController as MainInventoryController;
 use App\Http\Controllers\MainShop\MainShop\ExpenseController;
 use App\Http\Controllers\Branch\TransferHistoryController;
+use App\Http\Controllers\Branch\BranchAccountsController;
 use App\Http\Controllers\POS\MainPosController;
 use App\Http\Controllers\POS\BranchPosController;
 use App\Http\Controllers\POS\PosApiController;
@@ -216,7 +217,7 @@ Route::post('/main/transfers/{transfer}/cancel', [MainTransferController::class,
 
 
 
-Route::get('/branch/transfers', [TransferHistoryController::class, 'index'])->name('branch.transfers.index');
+// Route::get('/branch/transfers', [TransferHistoryController::class, 'index'])->name('branch.transfers.index');
 
 
 Route::get('/main/pos', [MainPosController::class, 'index'])->name('main.pos');
@@ -457,15 +458,18 @@ Route::prefix('branch')->middleware(['auth'])->group(function () {
     Route::get('/transfers', [\App\Http\Controllers\Branch\BranchTransferController::class, 'index'])
         ->name('branch.transfers.index');
 
-    // Claim (you already have these, keep them)
-    Route::get('/transfers/claim', [\App\Http\Controllers\Branch\TransferClaimController::class, 'showClaimForm'])
-        ->name('branch.transfers.claim_form');
-
-    Route::post('/transfers/claim', [\App\Http\Controllers\Branch\TransferClaimController::class, 'claim'])
-        ->name('branch.transfers.claim');
+   
 });
 
+// Branch Accounts
+Route::get('/branch/accounts', [\App\Http\Controllers\Branch\BranchAccountsController::class, 'index'])
+    ->name('branch.accounts.index');
 
+Route::get('/branch/accounts/{account}', [\App\Http\Controllers\Branch\BranchAccountsController::class, 'show'])
+    ->name('branch.accounts.show');
+
+Route::post('/branch/accounts/{account}/entries', [\App\Http\Controllers\Branch\BranchAccountsController::class, 'storeEntry'])
+    ->name('branch.accounts.entries.store');
 
 
 
