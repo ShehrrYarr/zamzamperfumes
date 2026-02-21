@@ -28,9 +28,9 @@ class PartialReturnController extends Controller
 
     public function sale(Sale $sale)
     {
-        $shop = $this->currentShopOrFail();
-        
-        abort_if($sale->shop_id !== $shop->id, 403, "Sale #{$sale->id} does not belong to this shop.");
+        // $shop = $this->currentShopOrFail();
+
+        // abort_if($sale->shop_id !== $shop->id, 403, "Sale #{$sale->id} does not belong to this shop.");
 
         $sale->load(['items', 'payments.bank']);
 
