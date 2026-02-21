@@ -32,172 +32,164 @@ class TransferClaimController extends Controller
         return view('panels.branch.transfers.claim');
     }
 
-    //  public function claim(Request $request)
-    // {
-    //     $branch = $this->branchShopOrFail();
+    
 
-    //     $data = $request->validate([
-    //         'code' => ['required', 'string', 'max:50'],
-    //     ]);
+//     public function claim(Request $request)
+// {
+//     $branch = $this->branchShopOrFail();
 
-    //     try {
-    //         DB::beginTransaction();
+//     $data = $request->validate([
+//         'code' => ['required', 'string', 'max:50'],
+//     ]);
 
-    //         $code = trim($data['code']);
+//     try {
+//         DB::beginTransaction();
 
-    //         $transfer = BatchTransfer::query()
-    //             ->where('code', $code)
-    //             ->lockForUpdate()
-    //             ->first();
+//         $transfer = \App\Models\BatchTransfer::query()
+//             ->where('code', trim($data['code']))
+//             ->lockForUpdate()
+//             ->first();
 
-    //         abort_if(!$transfer, 404, 'Invalid code.');
-    //         abort_if($transfer->status !== 'pending', 422, 'This code is already used or cancelled.');
-    //         abort_if((int)$transfer->to_shop_id !== (int)$branch->id, 403, 'This code is not for your branch.');
+//         abort_if(!$transfer, 404, 'Invalid code.');
+//         abort_if($transfer->status !== 'pending', 422, 'This code is already used or cancelled.');
+//         abort_if((int)$transfer->to_shop_id !== (int)$branch->id, 403, 'This code is not for your branch.');
 
-    //         // Load batches + perfume for item_name
-    //         $transfer->load(['items.batch.perfume']);
+//         $transfer->load(['items.batch.perfume']); // batch contains barcode/perfume info
 
-    //         abort_if($transfer->items->count() === 0, 422, 'Transfer has no items.');
+//         abort_if($transfer->items->count() === 0, 422, 'Transfer has no items.');
 
-    //         $mainShopId = (int)$transfer->from_shop_id;
+//         // We need main shop id for the internal sale
+//         $mainShopId = (int)$transfer->from_shop_id;
 
-    //         // ---------------------------
-    //         // 1) Create INTERNAL SALE (Main -> Branch) with 15% discount
-    //         // ---------------------------
-    //         $sale = Sale::create([
-    //             'shop_id'         => $mainShopId,
-    //             'user_id'         => auth()->id(),
+//         // -----------------------------
+//         // 1) Move stock to branch (NO main deduct here)
+//         // 2) Build internal sale subtotal from sell_price
+//         // -----------------------------
+//         $subtotal = 0.0;
 
-    //             // Store branch as "customer"
-    //             'customer_name'   => $branch->name ?? ('Branch #'.$branch->id),
-    //             'customer_phone'  => $branch->phone ?? null, // if you have phone column on shops, else null ok
+//         // We'll also lock/create branch batches carefully
+//         foreach ($transfer->items as $item) {
+//             $mainBatch = $item->batch;
+//             abort_if(!$mainBatch, 422, 'Batch missing for one of the transfer items.');
 
-    //             'subtotal'        => 0,
-    //             'discount_type'   => 'percent',
-    //             'discount_value'  => 15,
-    //             'discount_amount' => 0,
-    //             'grand_total'     => 0,
+//             $qty = (int)$item->quantity;
+//             abort_if($qty < 1, 422, 'Invalid quantity in transfer item.');
 
-    //             'status'          => 'completed', // or 'completed'/'paid' whatever you use
-    //         ]);
+//             $sell = (float)($mainBatch->sell_price ?? 0);
+//             $line = $sell * $qty;
+//             $subtotal += $line;
 
-    //         $subtotal = 0.0;
+//             // Branch batch by barcode (unique per shop)
+//             $branchBatch = \App\Models\Batch::query()
+//                 ->where('shop_id', $branch->id)
+//                 ->where('barcode', $mainBatch->barcode)
+//                 ->lockForUpdate()
+//                 ->first();
 
-    //         foreach ($transfer->items as $item) {
-    //             $mainBatch = $item->batch;
-    //             abort_if(!$mainBatch, 422, 'Batch missing for one of the transfer items.');
+//             $branchCost = round($sell * 0.85, 2); // 15% discount
 
-    //             // Safety check: item batch must belong to main shop
-    //             abort_if((int)$mainBatch->shop_id !== $mainShopId, 422, 'Invalid transfer batch source.');
+//             if (!$branchBatch) {
+//                 $branchBatch = \App\Models\Batch::create([
+//                     'perfume_id' => $mainBatch->perfume_id,
+//                     'shop_id'    => $branch->id,
+//                     'barcode'    => $mainBatch->barcode,
+//                     'batch_no'   => $mainBatch->batch_no,
+//                     'quantity'   => 0,
+//                     'cost_price' => $branchCost,       // ✅ branch cost = 15% less than sell
+//                     'sell_price' => $sell,             // ✅ keep same sell price
+//                     'mfg_date'   => $mainBatch->mfg_date,
+//                     'exp_date'   => $mainBatch->exp_date,
+//                     'is_active'  => true,
+//                 ]);
+//             } else {
+//                 // Keep selling price same; ensure cost price follows rule for transferred stock
+//                 $branchBatch->sell_price = $sell;
+//                 $branchBatch->cost_price = $branchCost;
+//                 $branchBatch->save();
+//             }
 
-    //             $qty = (int)$item->quantity;
-    //             abort_if($qty <= 0, 422, 'Invalid transfer quantity.');
+//             $branchBatch->increment('quantity', $qty);
+//         }
 
-    //             $sell = (float)($mainBatch->sell_price ?? 0);
-    //             abort_if($sell <= 0, 422, 'Selling price missing for batch: '.$mainBatch->barcode);
+//         // -----------------------------
+//         // 3) Create INTERNAL sale in MAIN shop
+//         //    discount = 15% (percent)
+//         //    payment = counter
+//         // -----------------------------
+//         $discountType = 'percent';
+//         $discountValue = 15.0;
+//         $discountAmount = round(min(($subtotal * 0.15), $subtotal), 2);
+//         $grandTotal = round(max($subtotal - $discountAmount, 0), 2);
 
-    //             $line = round($sell * $qty, 2);
-    //             $subtotal += $line;
+//         $sale = \App\Models\Sale::create([
+//             'shop_id'         => $mainShopId,
+//             'user_id'         => auth()->id(),
+//             'customer_name'   => 'Branch Transfer — ' . ($branch->name ?? ('Branch#'.$branch->id)),
+//             'customer_phone'  => null,
 
-    //             // Sale item in MAIN shop sale
-    //             SaleItem::create([
-    //                 'sale_id'    => $sale->id,
-    //                 'batch_id'   => $mainBatch->id,
-    //                 'barcode'    => $mainBatch->barcode,
-    //                 'item_name'  => $mainBatch->perfume?->name ?? 'Perfume',
-    //                 'unit_price' => round($sell, 2),
-    //                 'quantity'   => $qty,
-    //                 'line_total' => $line,
-    //             ]);
+//             'subtotal'        => round($subtotal, 2),
+//             'discount_type'   => $discountType,
+//             'discount_value'  => round($discountValue, 2),
+//             'discount_amount' => $discountAmount,
+//             'grand_total'     => $grandTotal,
 
-    //             // ---------------------------
-    //             // 2) Upsert BRANCH batch with same barcode
-    //             //    - sell_price = main sell_price
-    //             //    - cost_price = sell_price * 0.85
-    //             // ---------------------------
-    //             $branchSell = round($sell, 2);
-    //             $branchCost = round($branchSell * 0.85, 2);
+//             'status'          => 'completed',
 
-    //             $branchBatch = Batch::query()
-    //                 ->where('shop_id', $branch->id)
-    //                 ->where('barcode', $mainBatch->barcode)
-    //                 ->lockForUpdate()
-    //                 ->first();
+//             // ✅ flags for internal return logic
+//             'sale_type'       => 'internal_transfer',
+//             'related_shop_id' => (int)$branch->id,
+//             'transfer_id'     => (int)$transfer->id,
+//         ]);
 
-    //             if (!$branchBatch) {
-    //                 $branchBatch = Batch::create([
-    //                     'perfume_id' => $mainBatch->perfume_id,
-    //                     'shop_id'    => $branch->id,
-    //                     'barcode'    => $mainBatch->barcode,
-    //                     'batch_no'   => $mainBatch->batch_no,
-    //                     'quantity'   => 0,
-    //                     'cost_price' => $branchCost,
-    //                     'sell_price' => $branchSell,
-    //                     'mfg_date'   => $mainBatch->mfg_date,
-    //                     'exp_date'   => $mainBatch->exp_date,
-    //                     'is_active'  => true,
-    //                 ]);
-    //             } else {
-    //                 // enforce pricing rules on every claim
-    //                 $branchBatch->sell_price = $branchSell;
-    //                 $branchBatch->cost_price = $branchCost;
-    //                 $branchBatch->save();
-    //             }
+//         // Sale items reference MAIN batches (important for later returns)
+//         foreach ($transfer->items as $item) {
+//             $mainBatch = $item->batch;
+//             $qty = (int)$item->quantity;
 
-    //             $branchBatch->increment('quantity', $qty);
+//             $sell = (float)($mainBatch->sell_price ?? 0);
+//             $line = $sell * $qty;
 
-    //             // ✅ Keep your existing rule:
-    //             // DO NOT deduct from main shop here if already deducted when transfer created.
-    //         }
+//             \App\Models\SaleItem::create([
+//                 'sale_id'    => $sale->id,
+//                 'batch_id'   => $mainBatch->id,                  // ✅ main batch id
+//                 'barcode'    => $mainBatch->barcode,
+//                 'item_name'  => $mainBatch->perfume?->name ?? ('Batch#'.$mainBatch->id),
+//                 'unit_price' => round($sell, 2),
+//                 'quantity'   => $qty,
+//                 'line_total' => round($line, 2),
+//             ]);
+//         }
 
-    //         $subtotal = round($subtotal, 2);
-    //         $discountAmount = round($subtotal * 0.15, 2);
-    //         $grandTotal = round($subtotal - $discountAmount, 2);
+//         // Payment record as counter
+//         \App\Models\Payment::create([
+//             'shop_id' => $mainShopId,
+//             'sale_id' => $sale->id,
+//             'method'  => 'counter',
+//             'bank_id' => null,
+//             'amount'  => $grandTotal,
+//             'paid_at' => now(),
+//         ]);
 
-    //         $sale->subtotal = $subtotal;
-    //         $sale->discount_amount = $discountAmount;
-    //         $sale->grand_total = $grandTotal;
-    //         $sale->save();
+//         // Mark transfer claimed
+//         $transfer->status     = 'claimed';
+//         $transfer->claimed_at = now();
 
-    //         // Payment record (COUNTER) as requested
-    //         Payment::create([
-    //             'shop_id' => $mainShopId,
-    //             'sale_id' => $sale->id,
-    //             'method'  => 'counter',
-    //             'bank_id' => null,
-    //             'amount'  => $grandTotal,
-    //             'paid_at' => now(),
-    //         ]);
+//         if (\Schema::hasColumn('batch_transfers', 'claimed_by')) {
+//             $transfer->claimed_by = auth()->id();
+//         }
 
-    //         // ---------------------------
-    //         // 3) Mark transfer claimed
-    //         // ---------------------------
-    //         $transfer->status     = 'claimed';
-    //         $transfer->claimed_at = now();
+//         $transfer->save();
 
-    //         if (Schema::hasColumn('batch_transfers', 'claimed_by')) {
-    //             $transfer->claimed_by = auth()->id();
-    //         }
+//         DB::commit();
 
-    //         // Optional: save sale_id if column exists (no migration required)
-    //         if (Schema::hasColumn('batch_transfers', 'sale_id')) {
-    //             $transfer->sale_id = $sale->id;
-    //         }
+//         return back()->with('success', 'Transfer claimed + internal sale created. Code: '.$transfer->code.' | Sale #'.$sale->id);
+//     } catch (\Throwable $e) {
+//         DB::rollBack();
+//         return back()->with('error', $e->getMessage());
+//     }
+// }
 
-    //         $transfer->save();
-
-    //         DB::commit();
-
-    //         return back()->with('success', 'Transfer claimed. Code: '.$transfer->code.' | Main sale: #'.$sale->id);
-
-    //     } catch (\Throwable $e) {
-    //         DB::rollBack();
-    //         return back()->with('error', $e->getMessage());
-    //     }
-    // }
-
-
-    public function claim(Request $request)
+public function claim(Request $request)
 {
     $branch = $this->branchShopOrFail();
 
@@ -217,20 +209,16 @@ class TransferClaimController extends Controller
         abort_if($transfer->status !== 'pending', 422, 'This code is already used or cancelled.');
         abort_if((int)$transfer->to_shop_id !== (int)$branch->id, 403, 'This code is not for your branch.');
 
-        $transfer->load(['items.batch.perfume']); // batch contains barcode/perfume info
-
+        $transfer->load(['items.batch.perfume']);
         abort_if($transfer->items->count() === 0, 422, 'Transfer has no items.');
 
-        // We need main shop id for the internal sale
         $mainShopId = (int)$transfer->from_shop_id;
 
         // -----------------------------
-        // 1) Move stock to branch (NO main deduct here)
-        // 2) Build internal sale subtotal from sell_price
+        // 1) Move stock to branch + compute subtotal
         // -----------------------------
         $subtotal = 0.0;
 
-        // We'll also lock/create branch batches carefully
         foreach ($transfer->items as $item) {
             $mainBatch = $item->batch;
             abort_if(!$mainBatch, 422, 'Batch missing for one of the transfer items.');
@@ -239,17 +227,15 @@ class TransferClaimController extends Controller
             abort_if($qty < 1, 422, 'Invalid quantity in transfer item.');
 
             $sell = (float)($mainBatch->sell_price ?? 0);
-            $line = $sell * $qty;
-            $subtotal += $line;
+            $subtotal += ($sell * $qty);
 
-            // Branch batch by barcode (unique per shop)
             $branchBatch = \App\Models\Batch::query()
                 ->where('shop_id', $branch->id)
                 ->where('barcode', $mainBatch->barcode)
                 ->lockForUpdate()
                 ->first();
 
-            $branchCost = round($sell * 0.85, 2); // 15% discount
+            $branchCost = round($sell * 0.85, 2); // 15% less than sell
 
             if (!$branchBatch) {
                 $branchBatch = \App\Models\Batch::create([
@@ -258,14 +244,14 @@ class TransferClaimController extends Controller
                     'barcode'    => $mainBatch->barcode,
                     'batch_no'   => $mainBatch->batch_no,
                     'quantity'   => 0,
-                    'cost_price' => $branchCost,       // ✅ branch cost = 15% less than sell
-                    'sell_price' => $sell,             // ✅ keep same sell price
+                    'cost_price' => $branchCost,
+                    'sell_price' => $sell,
                     'mfg_date'   => $mainBatch->mfg_date,
                     'exp_date'   => $mainBatch->exp_date,
                     'is_active'  => true,
                 ]);
             } else {
-                // Keep selling price same; ensure cost price follows rule for transferred stock
+                // keep sell same; cost should follow rule for transferred stock
                 $branchBatch->sell_price = $sell;
                 $branchBatch->cost_price = $branchCost;
                 $branchBatch->save();
@@ -275,12 +261,8 @@ class TransferClaimController extends Controller
         }
 
         // -----------------------------
-        // 3) Create INTERNAL sale in MAIN shop
-        //    discount = 15% (percent)
-        //    payment = counter
+        // 2) Create INTERNAL sale in MAIN shop (15% discount)
         // -----------------------------
-        $discountType = 'percent';
-        $discountValue = 15.0;
         $discountAmount = round(min(($subtotal * 0.15), $subtotal), 2);
         $grandTotal = round(max($subtotal - $discountAmount, 0), 2);
 
@@ -291,39 +273,36 @@ class TransferClaimController extends Controller
             'customer_phone'  => null,
 
             'subtotal'        => round($subtotal, 2),
-            'discount_type'   => $discountType,
-            'discount_value'  => round($discountValue, 2),
+            'discount_type'   => 'percent',
+            'discount_value'  => 15.0,
             'discount_amount' => $discountAmount,
             'grand_total'     => $grandTotal,
 
             'status'          => 'completed',
 
-            // ✅ flags for internal return logic
+            // flags for your internal logic
             'sale_type'       => 'internal_transfer',
             'related_shop_id' => (int)$branch->id,
             'transfer_id'     => (int)$transfer->id,
         ]);
 
-        // Sale items reference MAIN batches (important for later returns)
         foreach ($transfer->items as $item) {
             $mainBatch = $item->batch;
             $qty = (int)$item->quantity;
 
             $sell = (float)($mainBatch->sell_price ?? 0);
-            $line = $sell * $qty;
 
             \App\Models\SaleItem::create([
                 'sale_id'    => $sale->id,
-                'batch_id'   => $mainBatch->id,                  // ✅ main batch id
+                'batch_id'   => $mainBatch->id, // main batch id
                 'barcode'    => $mainBatch->barcode,
                 'item_name'  => $mainBatch->perfume?->name ?? ('Batch#'.$mainBatch->id),
                 'unit_price' => round($sell, 2),
                 'quantity'   => $qty,
-                'line_total' => round($line, 2),
+                'line_total' => round($sell * $qty, 2),
             ]);
         }
 
-        // Payment record as counter
         \App\Models\Payment::create([
             'shop_id' => $mainShopId,
             'sale_id' => $sale->id,
@@ -333,7 +312,71 @@ class TransferClaimController extends Controller
             'paid_at' => now(),
         ]);
 
-        // Mark transfer claimed
+        // -----------------------------
+        // 3) Accounts posting (YOUR schema: debit/credit)
+        // -----------------------------
+        $accountsWarning = null;
+
+        try {
+            $branchAccount = \App\Models\Account::query()
+                ->where('shop_id', (int)$branch->id)
+                ->orderByDesc('id')
+                ->first();
+
+            $mainAccount = \App\Models\Account::query()
+                ->where('shop_id', (int)$mainShopId)
+                ->orderByDesc('id')
+                ->first();
+
+            if (!$branchAccount || !$mainAccount) {
+                $accountsWarning = 'Account entry skipped: account not found for branch/main.';
+            } else {
+                $refType = 'batch_transfer_claim';
+                $refId   = (int)$transfer->id;
+
+                $already = \App\Models\AccountEntry::query()
+                    ->where('ref_type', $refType)
+                    ->where('ref_id', $refId)
+                    ->exists();
+
+                if (!$already) {
+                    $desc = "Transfer {$transfer->code} claimed | Internal Sale #{$sale->id} | 15% discount";
+
+                    // Branch: DEBIT (branch owes main)
+                    \App\Models\AccountEntry::create([
+                        'account_id'  => $branchAccount->id,
+                        'shop_id'     => (int)$branch->id,
+                        'user_id'     => auth()->id(),
+                        'entry_date'  => now()->toDateString(),
+                        'debit'       => $grandTotal,
+                        'credit'      => 0,
+                        'description' => $desc,
+                        'ref_type'    => $refType,
+                        'ref_id'      => $refId,
+                    ]);
+
+                    // Main: CREDIT (main will receive)
+                    \App\Models\AccountEntry::create([
+                        'account_id'  => $mainAccount->id,
+                        'shop_id'     => (int)$mainShopId,
+                        'user_id'     => auth()->id(),
+                        'entry_date'  => now()->toDateString(),
+                        'debit'       => 0,
+                        'credit'      => $grandTotal,
+                        'description' => $desc,
+                        'ref_type'    => $refType,
+                        'ref_id'      => $refId,
+                    ]);
+                }
+            }
+        } catch (\Throwable $e) {
+            // Do not break claim
+            $accountsWarning = 'Account entry failed: ' . $e->getMessage();
+        }
+
+        // -----------------------------
+        // 4) Mark transfer claimed
+        // -----------------------------
         $transfer->status     = 'claimed';
         $transfer->claimed_at = now();
 
@@ -345,7 +388,14 @@ class TransferClaimController extends Controller
 
         DB::commit();
 
-        return back()->with('success', 'Transfer claimed + internal sale created. Code: '.$transfer->code.' | Sale #'.$sale->id);
+        $msg = 'Transfer claimed + internal sale created. Code: '.$transfer->code.' | Sale #'.$sale->id;
+
+        if ($accountsWarning) {
+            return back()->with('success', $msg)->with('warning', $accountsWarning);
+        }
+
+        return back()->with('success', $msg.' | Accounts posted ✅');
+
     } catch (\Throwable $e) {
         DB::rollBack();
         return back()->with('error', $e->getMessage());

@@ -58,6 +58,9 @@
                 <a class="nav-link {{ request()->routeIs('admin.expenses.*') ? 'active' : '' }}"
                     href="{{ route('admin.expenses.index') }}">Expenses</a>
 
+                    <a class="nav-link {{ request()->routeIs('admin.accounts.*') ? 'active' : '' }}"
+                        href="{{ route('admin.accounts.index') }}">Accounts</a>
+
 
 
                 @elseif($role === 'main_shop')
@@ -83,6 +86,9 @@
 
                 <a class="nav-link {{ request()->routeIs('main.expenses.*') ? 'active' : '' }}"
                     href="{{ route('main.expenses.index') }}">Expenses</a>
+
+                    <a class="nav-link {{ request()->routeIs('main.accounts.*') ? 'active' : '' }}"
+                        href="{{ route('main.accounts.index') }}">Accounts</a>
 
 
                 @elseif($role === 'branch_shop')

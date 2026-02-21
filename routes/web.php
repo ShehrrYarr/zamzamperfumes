@@ -37,12 +37,14 @@ use App\Http\Controllers\Admin\BranchController;
 use App\Http\Controllers\Admin\BranchStaffController;
 use App\Http\Controllers\Admin\MainShopController;
 use App\Http\Controllers\Admin\MainShopStaffController;
+use App\Http\Controllers\Admin\AdminAccountsController;
 use App\Http\Controllers\Branch\StaffController;
 use App\Http\Controllers\Branch\ExpenseController as BranchExpenseController;
 use App\Http\Controllers\MainShop\BranchesController as MainShopBranchesController;
 use App\Http\Controllers\Admin\PerfumeController as AdminPerfumeController;
 use App\Http\Controllers\Admin\AdminExpenseController;
 use App\Http\Controllers\MainShop\PerfumeController as MainPerfumeController;
+use App\Http\Controllers\MainShop\MainAccountsController;
 use App\Http\Controllers\Admin\BatchController as AdminBatchController;
 use App\Http\Controllers\MainShop\BatchController as MainBatchController;
 use App\Http\Controllers\MainShop\TransferController as MainTransferController;
@@ -417,13 +419,51 @@ Route::patch('/admin/batches/{batch}/update-qty', [AdminBatchController::class, 
     ->name('admin.batches.update_qty');
 
 
+    // ADMIN
+Route::get('/admin/accounts', [\App\Http\Controllers\Admin\AdminAccountsController::class,'index'])->name('admin.accounts.index');
+Route::get('/admin/accounts/create', [\App\Http\Controllers\Admin\AdminAccountsController::class,'create'])->name('admin.accounts.create');
+Route::post('/admin/accounts', [\App\Http\Controllers\Admin\AdminAccountsController::class,'store'])->name('admin.accounts.store');
+Route::get('/admin/accounts/{account}', [\App\Http\Controllers\Admin\AdminAccountsController::class,'show'])->name('admin.accounts.show');
+Route::post('/admin/accounts/{account}/entries', [\App\Http\Controllers\Admin\AdminAccountsController::class,'addEntry'])->name('admin.accounts.entries.store');
 
 
 
 
+// MAIN SHOP — Accounts
+Route::middleware(['auth'])->group(function () {
+    Route::get('/main/accounts', [\App\Http\Controllers\MainShop\MainAccountsController::class,'index'])
+        ->name('main.accounts.index');
+
+    Route::get('/main/accounts/{account}', [\App\Http\Controllers\MainShop\MainAccountsController::class,'show'])
+        ->name('main.accounts.show');
+
+    Route::post('/main/accounts/{account}/entries', [\App\Http\Controllers\MainShop\MainAccountsController::class,'storeEntry'])
+        ->name('main.accounts.entries.store');
+});
 
 
 
+// Branch ↔ Branch Transfers
+Route::prefix('branch')->middleware(['auth'])->group(function () {
+
+    // Transfer create (send to another branch)
+    Route::get('/transfers/create', [\App\Http\Controllers\Branch\BranchTransferController::class, 'create'])
+        ->name('branch.transfers.create');
+
+    Route::post('/transfers', [\App\Http\Controllers\Branch\BranchTransferController::class, 'store'])
+        ->name('branch.transfers.store');
+
+    // Transfers history (sent + received)
+    Route::get('/transfers', [\App\Http\Controllers\Branch\BranchTransferController::class, 'index'])
+        ->name('branch.transfers.index');
+
+    // Claim (you already have these, keep them)
+    Route::get('/transfers/claim', [\App\Http\Controllers\Branch\TransferClaimController::class, 'showClaimForm'])
+        ->name('branch.transfers.claim_form');
+
+    Route::post('/transfers/claim', [\App\Http\Controllers\Branch\TransferClaimController::class, 'claim'])
+        ->name('branch.transfers.claim');
+});
 
 
 
