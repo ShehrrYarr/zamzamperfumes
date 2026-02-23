@@ -76,6 +76,7 @@
                             <th>Title</th>
                             <th>Notes</th>
                             <th class="text-right">Amount</th>
+                            <th>Action</th>
                             <th>Added By</th>
                         </tr>
                     </thead>
@@ -91,6 +92,11 @@
                             <td style="font-weight:700;">{{ $e->title }}</td>
                             <td class="muted">{{ $e->notes ? \Illuminate\Support\Str::limit($e->notes, 60) : '—' }}</td>
                             <td class="text-right" style="font-weight:900;">Rs {{ number_format((float)$e->amount, 2) }}
+                            </td>
+                            <td>
+                                <a href="{{ route('admin.expenses.edit', $e->id) }}" target="_blank" class="btn btn-sm btn-primary">
+                                    Edit
+                                </a>
                             </td>
                             <td class="muted">{{ $e->user?->name ?? '—' }}</td>
                         </tr>

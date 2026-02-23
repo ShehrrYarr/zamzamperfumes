@@ -47,4 +47,35 @@ class AdminExpenseController extends Controller
 
         return view('admin.expenses.index', compact('items','total','shops','shopId','from','to','q'));
     }
+
+    // ✅ NEW — Edit Page
+    public function edit(Expense $expense)
+    {
+        $this->assertAdmin();
+
+        $shops = Shop::orderBy('type')->orderBy('name')->get();
+
+        return view('admin.expenses.edit', compact('expense','shops'));
+    }
+
+    // ✅ NEW — Update Logic
+    public function update(Request $request, Expense $expense)
+    {
+        $this->assertAdmin();
+
+        $data = $request->validate([
+            'shop_id'      => ['required','exists:shops,id'],
+            'expense_date' => ['required','date'],
+            'category'     => ['nullable','string','max:255'],
+            'title'        => ['required','string','max:255'],
+            'notes'        => ['nullable','string'],
+            'amount'       => ['required','numeric','min:0'],
+        ]);
+
+        $expense->update($data);
+
+        return redirect()
+            ->route('admin.expenses.edit', $expense)
+            ->with('success','Expense updated successfully.');
+    }
 }

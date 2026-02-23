@@ -406,8 +406,18 @@ Route::get('/branch/expenses', [\App\Http\Controllers\Branch\BranchExpenseContro
 Route::get('/branch/expenses/create', [\App\Http\Controllers\Branch\BranchExpenseController::class,'create'])->name('branch.expenses.create');
 Route::post('/branch/expenses', [\App\Http\Controllers\Branch\BranchExpenseController::class,'store'])->name('branch.expenses.store');
 
-Route::get('/admin/expenses', [\App\Http\Controllers\Admin\AdminExpenseController::class,'index'])->name('admin.expenses.index');
+// Route::get('/admin/expenses', [\App\Http\Controllers\Admin\AdminExpenseController::class,'index'])->name('admin.expenses.index');
+Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
 
+    Route::get('expenses', [AdminExpenseController::class, 'index'])->name('expenses.index');
+
+    Route::get('expenses/{expense}/edit', [AdminExpenseController::class, 'edit'])
+        ->name('expenses.edit');
+
+    Route::put('expenses/{expense}', [AdminExpenseController::class, 'update'])
+        ->name('expenses.update');
+
+});
 
 Route::patch('/admin/batches/{batch}/update-quantity',
     [AdminBatchController::class, 'updateQuantity']
