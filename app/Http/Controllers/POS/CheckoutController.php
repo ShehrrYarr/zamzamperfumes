@@ -147,6 +147,7 @@ class CheckoutController extends Controller
                         'item_name' => $batch->perfume?->name ?? ('Batch#'.$batch->id),
                         'unit_price' => round($unitPrice, 2),
                         'quantity' => $qty,
+                        'original_quantity' => $qty,
                         'line_total' => round($lineTotal, 2),
                     ]);
 
