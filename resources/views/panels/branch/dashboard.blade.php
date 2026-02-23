@@ -94,6 +94,14 @@
                         <div class="hint">Branch batch quantities</div>
                     </a>
                 </div>
+                <div class="col-12">
+                    <a href="{{ route('branch.reports.sales') }}" class="card stat stat-green"
+                        style="display:block;text-decoration:none;color:inherit;padding:16px;">
+                        <div class="k">Reports</div>
+                        <div class="v" style="font-size:18px;">Sales Report</div>
+                        <div class="hint">View sales report</div>
+                    </a>
+                </div>
 
                 <div class="col-12">
                     <a href="{{ route('branch.banks.index') }}" class="card stat stat-purple"

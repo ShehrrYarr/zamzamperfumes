@@ -39,6 +39,7 @@ use App\Http\Controllers\Admin\MainShopController;
 use App\Http\Controllers\Admin\MainShopStaffController;
 use App\Http\Controllers\Admin\AdminAccountsController;
 use App\Http\Controllers\Branch\StaffController;
+use App\Http\Controllers\Branch\BranchReportsController;
 use App\Http\Controllers\Branch\ExpenseController as BranchExpenseController;
 use App\Http\Controllers\MainShop\BranchesController as MainShopBranchesController;
 use App\Http\Controllers\Admin\PerfumeController as AdminPerfumeController;
@@ -480,6 +481,8 @@ Route::get('/branch/accounts/{account}', [\App\Http\Controllers\Branch\BranchAcc
 
 Route::post('/branch/accounts/{account}/entries', [\App\Http\Controllers\Branch\BranchAccountsController::class, 'storeEntry'])
     ->name('branch.accounts.entries.store');
+
+    Route::get('/reports/sales', [BranchReportsController::class, 'sales'])->name('branch.reports.sales');
 
 
 
