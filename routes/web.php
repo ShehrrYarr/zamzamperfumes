@@ -482,7 +482,7 @@ Route::get('/branch/accounts/{account}', [\App\Http\Controllers\Branch\BranchAcc
 Route::post('/branch/accounts/{account}/entries', [\App\Http\Controllers\Branch\BranchAccountsController::class, 'storeEntry'])
     ->name('branch.accounts.entries.store');
 
-    Route::get('/reports/sales', [BranchReportsController::class, 'sales'])->name('branch.reports.sales');
+    Route::get('branch/reports/sales', [BranchReportsController::class, 'sales'])->name('branch.reports.sales');
 
 
 
