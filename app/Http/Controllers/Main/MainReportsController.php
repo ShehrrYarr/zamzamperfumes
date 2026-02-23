@@ -212,75 +212,154 @@ class MainReportsController extends Controller
 }
 
 
+    // public function returns(Request $request)
+    // {
+    //     $this->assertMain();
+
+    //     $shopId = (int)auth()->user()->shop_id;
+
+    //     $qBase = SaleReturn::query()
+    //         ->with(['shop', 'user', 'sale'])
+    //         ->where('sale_returns.shop_id', $shopId)
+    //         ->orderByDesc('sale_returns.id');
+
+    //     if ($request->filled('from')) {
+    //         $qBase->whereDate('sale_returns.created_at', '>=', $request->from);
+    //     }
+    //     if ($request->filled('to')) {
+    //         $qBase->whereDate('sale_returns.created_at', '<=', $request->to);
+    //     }
+    //     if ($request->filled('method')) {
+    //         $qBase->where('sale_returns.method', $request->method);
+    //     }
+
+    //     // STRICT-safe return cost subquery per return id
+    //     $returnCostSub = DB::table('sale_return_items')
+    //         ->join('batches', 'batches.id', '=', 'sale_return_items.batch_id')
+    //         ->join('sale_returns as r', 'r.id', '=', 'sale_return_items.sale_return_id')
+    //         ->whereColumn('batches.shop_id', 'r.shop_id')
+    //         ->where('r.shop_id', $shopId)
+    //         ->selectRaw('sale_return_items.sale_return_id as rid')
+    //         ->selectRaw('COALESCE(SUM(sale_return_items.quantity * COALESCE(batches.cost_price,0)),0) as return_cost_total')
+    //         ->groupBy('sale_return_items.sale_return_id');
+
+    //     $q = (clone $qBase)
+    //         ->leftJoinSub($returnCostSub, 'rc', function ($join) {
+    //             $join->on('rc.rid', '=', 'sale_returns.id');
+    //         })
+    //         ->select('sale_returns.*')
+    //         ->selectRaw('COALESCE(rc.return_cost_total,0) as return_cost_total');
+
+    //     $returns = $q->paginate(25)->withQueryString();
+
+    //     // Totals
+    //     $totalsBase = (clone $qBase)->reorder();
+
+    //     $totals = (object)[
+    //         'return_count'      => (int)(clone $totalsBase)->count(),
+    //         'refund_total'      => (float)(clone $totalsBase)->sum('refund_amount'),
+    //         'return_cost_total' => 0.0,
+    //     ];
+
+    //     $returnCostTotalQ = DB::table('sale_return_items')
+    //         ->join('batches', 'batches.id', '=', 'sale_return_items.batch_id')
+    //         ->join('sale_returns', 'sale_returns.id', '=', 'sale_return_items.sale_return_id')
+    //         ->whereColumn('batches.shop_id', 'sale_returns.shop_id')
+    //         ->where('sale_returns.shop_id', $shopId);
+
+    //     if ($request->filled('from')) {
+    //         $returnCostTotalQ->whereDate('sale_returns.created_at', '>=', $request->from);
+    //     }
+    //     if ($request->filled('to')) {
+    //         $returnCostTotalQ->whereDate('sale_returns.created_at', '<=', $request->to);
+    //     }
+    //     if ($request->filled('method')) {
+    //         $returnCostTotalQ->where('sale_returns.method', $request->method);
+    //     }
+
+    //     $totals->return_cost_total = (float)$returnCostTotalQ
+    //         ->selectRaw('COALESCE(SUM(sale_return_items.quantity * COALESCE(batches.cost_price,0)),0) as return_cost_total')
+    //         ->value('return_cost_total');
+
+    //     return view('panels.main.reports.returns', compact('returns', 'totals'));
+    // }
+
     public function returns(Request $request)
-    {
-        $this->assertMain();
+{
+    $this->assertMain();
 
-        $shopId = (int)auth()->user()->shop_id;
+    $shopId = (int)auth()->user()->shop_id;
 
-        $qBase = SaleReturn::query()
-            ->with(['shop', 'user', 'sale'])
-            ->where('sale_returns.shop_id', $shopId)
-            ->orderByDesc('sale_returns.id');
+    $qBase = SaleReturn::query()
+        ->with([
+            'shop',
+            'user',
+            'sale',
+            // ✅ NEW: load returned items + their sale item + batch (for barcode/name fallback)
+            'items.saleItem',
+            'items.batch.perfume',
+        ])
+        ->where('sale_returns.shop_id', $shopId)
+        ->orderByDesc('sale_returns.id');
 
-        if ($request->filled('from')) {
-            $qBase->whereDate('sale_returns.created_at', '>=', $request->from);
-        }
-        if ($request->filled('to')) {
-            $qBase->whereDate('sale_returns.created_at', '<=', $request->to);
-        }
-        if ($request->filled('method')) {
-            $qBase->where('sale_returns.method', $request->method);
-        }
-
-        // STRICT-safe return cost subquery per return id
-        $returnCostSub = DB::table('sale_return_items')
-            ->join('batches', 'batches.id', '=', 'sale_return_items.batch_id')
-            ->join('sale_returns as r', 'r.id', '=', 'sale_return_items.sale_return_id')
-            ->whereColumn('batches.shop_id', 'r.shop_id')
-            ->where('r.shop_id', $shopId)
-            ->selectRaw('sale_return_items.sale_return_id as rid')
-            ->selectRaw('COALESCE(SUM(sale_return_items.quantity * COALESCE(batches.cost_price,0)),0) as return_cost_total')
-            ->groupBy('sale_return_items.sale_return_id');
-
-        $q = (clone $qBase)
-            ->leftJoinSub($returnCostSub, 'rc', function ($join) {
-                $join->on('rc.rid', '=', 'sale_returns.id');
-            })
-            ->select('sale_returns.*')
-            ->selectRaw('COALESCE(rc.return_cost_total,0) as return_cost_total');
-
-        $returns = $q->paginate(25)->withQueryString();
-
-        // Totals
-        $totalsBase = (clone $qBase)->reorder();
-
-        $totals = (object)[
-            'return_count'      => (int)(clone $totalsBase)->count(),
-            'refund_total'      => (float)(clone $totalsBase)->sum('refund_amount'),
-            'return_cost_total' => 0.0,
-        ];
-
-        $returnCostTotalQ = DB::table('sale_return_items')
-            ->join('batches', 'batches.id', '=', 'sale_return_items.batch_id')
-            ->join('sale_returns', 'sale_returns.id', '=', 'sale_return_items.sale_return_id')
-            ->whereColumn('batches.shop_id', 'sale_returns.shop_id')
-            ->where('sale_returns.shop_id', $shopId);
-
-        if ($request->filled('from')) {
-            $returnCostTotalQ->whereDate('sale_returns.created_at', '>=', $request->from);
-        }
-        if ($request->filled('to')) {
-            $returnCostTotalQ->whereDate('sale_returns.created_at', '<=', $request->to);
-        }
-        if ($request->filled('method')) {
-            $returnCostTotalQ->where('sale_returns.method', $request->method);
-        }
-
-        $totals->return_cost_total = (float)$returnCostTotalQ
-            ->selectRaw('COALESCE(SUM(sale_return_items.quantity * COALESCE(batches.cost_price,0)),0) as return_cost_total')
-            ->value('return_cost_total');
-
-        return view('panels.main.reports.returns', compact('returns', 'totals'));
+    if ($request->filled('from')) {
+        $qBase->whereDate('sale_returns.created_at', '>=', $request->from);
     }
+    if ($request->filled('to')) {
+        $qBase->whereDate('sale_returns.created_at', '<=', $request->to);
+    }
+    if ($request->filled('method')) {
+        $qBase->where('sale_returns.method', $request->method);
+    }
+
+    // STRICT-safe return cost subquery per return id
+    $returnCostSub = DB::table('sale_return_items')
+        ->join('batches', 'batches.id', '=', 'sale_return_items.batch_id')
+        ->join('sale_returns as r', 'r.id', '=', 'sale_return_items.sale_return_id')
+        ->whereColumn('batches.shop_id', 'r.shop_id')
+        ->where('r.shop_id', $shopId)
+        ->selectRaw('sale_return_items.sale_return_id as rid')
+        ->selectRaw('COALESCE(SUM(sale_return_items.quantity * COALESCE(batches.cost_price,0)),0) as return_cost_total')
+        ->groupBy('sale_return_items.sale_return_id');
+
+    $q = (clone $qBase)
+        ->leftJoinSub($returnCostSub, 'rc', function ($join) {
+            $join->on('rc.rid', '=', 'sale_returns.id');
+        })
+        ->select('sale_returns.*')
+        ->selectRaw('COALESCE(rc.return_cost_total,0) as return_cost_total');
+
+    $returns = $q->paginate(25)->withQueryString();
+
+    // Totals
+    $totalsBase = (clone $qBase)->reorder();
+
+    $totals = (object)[
+        'return_count'      => (int)(clone $totalsBase)->count(),
+        'refund_total'      => (float)(clone $totalsBase)->sum('refund_amount'),
+        'return_cost_total' => 0.0,
+    ];
+
+    $returnCostTotalQ = DB::table('sale_return_items')
+        ->join('batches', 'batches.id', '=', 'sale_return_items.batch_id')
+        ->join('sale_returns', 'sale_returns.id', '=', 'sale_return_items.sale_return_id')
+        ->whereColumn('batches.shop_id', 'sale_returns.shop_id')
+        ->where('sale_returns.shop_id', $shopId);
+
+    if ($request->filled('from')) {
+        $returnCostTotalQ->whereDate('sale_returns.created_at', '>=', $request->from);
+    }
+    if ($request->filled('to')) {
+        $returnCostTotalQ->whereDate('sale_returns.created_at', '<=', $request->to);
+    }
+    if ($request->filled('method')) {
+        $returnCostTotalQ->where('sale_returns.method', $request->method);
+    }
+
+    $totals->return_cost_total = (float)$returnCostTotalQ
+        ->selectRaw('COALESCE(SUM(sale_return_items.quantity * COALESCE(batches.cost_price,0)),0) as return_cost_total')
+        ->value('return_cost_total');
+
+    return view('panels.main.reports.returns', compact('returns', 'totals'));
+}
 }
