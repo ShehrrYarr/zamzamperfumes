@@ -217,6 +217,7 @@ class TransferClaimController extends Controller
                 'item_name'  => $mainBatch->perfume?->name ?? ('Batch#' . $mainBatch->id),
                 'unit_price' => round($sell, 2),
                 'quantity'   => $qty,
+                'original_quantity'   => $qty,
                 'line_total' => round($sell * $qty, 2),
             ]);
         }
