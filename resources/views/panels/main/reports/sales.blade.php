@@ -39,6 +39,15 @@
                     </select>
                 </div>
 
+                <div class="col-md-2">
+                    <label class="mb-1"><b>Sale Type</b></label>
+                    <select name="sale_type" class="form-control">
+                        <option value="">All</option>
+                        <option value="customer" @selected(request('sale_type')==='customer' )>Customer</option>
+                        <option value="internal_transfer" @selected(request('sale_type')==='internal_transfer' )>Internal Sale</option>
+                    </select>
+                </div>
+
                 <div class="col-md-3 mb-2">
                     <label class="mb-1"><b>Payment</b></label>
                     <select name="payment_method" class="form-control" id="paymentMethod">

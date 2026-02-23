@@ -154,6 +154,8 @@ class AdminReportsController extends Controller
 
 //     return view('admin.reports.sales', compact('sales', 'totals', 'profit', 'shops'));
 // }
+
+
 public function sales(Request $request)
 {
     $this->assertAdmin();
@@ -182,6 +184,21 @@ public function sales(Request $request)
         $salesQ->whereIn('sales.status', ['completed', 'partial_return']);
     }
 
+    // ✅ Sale type filter (customer vs internal_sale)
+    if ($request->filled('sale_type')) {
+        $st = $request->sale_type;
+
+        if ($st === 'customer') {
+            // support old rows where sale_type might be NULL
+            $salesQ->where(function ($qq) {
+                $qq->whereNull('sales.sale_type')
+                   ->orWhere('sales.sale_type', 'customer');
+            });
+        } else {
+            $salesQ->where('sales.sale_type', $st);
+        }
+    }
+
     // ✅ STRICT-SAFE cost subquery grouped by sale_id
     $costSub = DB::table('sale_items')
         ->join('batches', 'batches.id', '=', 'sale_items.batch_id')
@@ -207,6 +224,20 @@ public function sales(Request $request)
         $costSub->where('s.status', $request->status);
     } else {
         $costSub->whereIn('s.status', ['completed', 'partial_return']);
+    }
+
+    // ✅ same sale_type behavior
+    if ($request->filled('sale_type')) {
+        $st = $request->sale_type;
+
+        if ($st === 'customer') {
+            $costSub->where(function ($qq) {
+                $qq->whereNull('s.sale_type')
+                   ->orWhere('s.sale_type', 'customer');
+            });
+        } else {
+            $costSub->where('s.sale_type', $st);
+        }
     }
 
     // Join costSub to sales list
@@ -254,6 +285,20 @@ public function sales(Request $request)
         $costTotalQ->whereIn('sales.status', ['completed', 'partial_return']);
     }
 
+    // ✅ same sale_type behavior
+    if ($request->filled('sale_type')) {
+        $st = $request->sale_type;
+
+        if ($st === 'customer') {
+            $costTotalQ->where(function ($qq) {
+                $qq->whereNull('sales.sale_type')
+                   ->orWhere('sales.sale_type', 'customer');
+            });
+        } else {
+            $costTotalQ->where('sales.sale_type', $st);
+        }
+    }
+
     $totals->cost_total = (float)$costTotalQ
         ->selectRaw('COALESCE(SUM(sale_items.quantity * COALESCE(batches.cost_price,0)),0) as cost_total')
         ->value('cost_total');
@@ -261,90 +306,5 @@ public function sales(Request $request)
     $profit = (float)$totals->revenue_total - (float)$totals->cost_total;
 
     return view('admin.reports.sales', compact('sales', 'totals', 'profit', 'shops'));
-}
-
-   public function returns(Request $request)
-{
-    $this->assertAdmin();
-
-    $shops = Shop::orderBy('type')->orderBy('name')->get();
-
-    // Base returns query (no joins that cause GROUP BY issues)
-    $returnsQ = SaleReturn::query()
-        ->with([
-            'shop',
-            'user',
-            'sale',
-
-            // ✅ NEW: items of this return + fallback relations for display
-            'items.saleItem',
-            'items.batch.perfume',
-        ])
-        ->orderByDesc('sale_returns.id');
-
-    if ($request->filled('shop_id')) {
-        $returnsQ->where('sale_returns.shop_id', (int)$request->shop_id);
-    }
-    if ($request->filled('from')) {
-        $returnsQ->whereDate('sale_returns.created_at', '>=', $request->from);
-    }
-    if ($request->filled('to')) {
-        $returnsQ->whereDate('sale_returns.created_at', '<=', $request->to);
-    }
-    if ($request->filled('method')) {
-        $returnsQ->where('sale_returns.method', $request->method);
-    }
-
-    // ✅ STRICT-SAFE return cost subquery grouped by sale_return_id
-    $returnCostSub = DB::table('sale_return_items')
-        ->join('batches', 'batches.id', '=', 'sale_return_items.batch_id')
-        ->join('sale_returns as r', 'r.id', '=', 'sale_return_items.sale_return_id')
-        ->whereColumn('batches.shop_id', 'r.shop_id')
-        ->selectRaw('sale_return_items.sale_return_id as rid')
-        ->selectRaw('COALESCE(SUM(sale_return_items.quantity * COALESCE(batches.cost_price,0)),0) as return_cost_total')
-        ->groupBy('sale_return_items.sale_return_id');
-
-    $q = (clone $returnsQ)
-        ->leftJoinSub($returnCostSub, 'rc', function ($join) {
-            $join->on('rc.rid', '=', 'sale_returns.id');
-        })
-        ->select('sale_returns.*')
-        ->selectRaw('COALESCE(rc.return_cost_total,0) as return_cost_total');
-
-    $returns = $q->paginate(25)->withQueryString();
-
-    // ✅ STRICT-SAFE totals
-    $totalsBase = (clone $returnsQ)->reorder();
-
-    $totals = (object)[
-        'return_count'      => (int)(clone $totalsBase)->count(),
-        'refund_total'      => (float)(clone $totalsBase)->sum('refund_amount'),
-        'return_cost_total' => 0.0,
-    ];
-
-    // Total return cost across filtered returns
-    $returnCostTotalQ = DB::table('sale_return_items')
-        ->join('batches', 'batches.id', '=', 'sale_return_items.batch_id')
-        ->join('sale_returns', 'sale_returns.id', '=', 'sale_return_items.sale_return_id')
-        ->whereColumn('batches.shop_id', 'sale_returns.shop_id');
-
-    if ($request->filled('shop_id')) {
-        $returnCostTotalQ->where('sale_returns.shop_id', (int)$request->shop_id);
-    }
-    if ($request->filled('from')) {
-        $returnCostTotalQ->whereDate('sale_returns.created_at', '>=', $request->from);
-    }
-    if ($request->filled('to')) {
-        $returnCostTotalQ->whereDate('sale_returns.created_at', '<=', $request->to);
-    }
-    if ($request->filled('method')) {
-        $returnCostTotalQ->where('sale_returns.method', $request->method);
-    }
-
-    $totals->return_cost_total = (float)$returnCostTotalQ
-        ->selectRaw('COALESCE(SUM(sale_return_items.quantity * COALESCE(batches.cost_price,0)),0) as return_cost_total')
-        ->value('return_cost_total');
-
-    return view('admin.reports.returns', compact('returns', 'totals', 'shops'));
 }
 }
