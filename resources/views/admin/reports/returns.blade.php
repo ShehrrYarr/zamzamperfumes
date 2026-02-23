@@ -38,8 +38,8 @@
                     <label>Method</label>
                     <select name="method" class="form-control">
                         <option value="">All</option>
-                        <option value="counter" @selected(request('method')==='counter' )>Counter</option>
-                        <option value="bank" @selected(request('method')==='bank' )>Bank</option>
+                        <option value="full" @selected(request('method')==='full' )>Full Return</option>
+                        <option value="partial" @selected(request('method')==='partial' )>Partial Return</option>
                     </select>
                 </div>
 
@@ -81,23 +81,86 @@
                         <th>Method</th>
                         <th class="text-end">Refund</th>
                         <th class="text-end">Return Cost</th>
+                        <th>Items</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($returns as $r)
+                    @php
+                    $collapseId = 'returnItems_'.$r->id;
+                    $countItems = $r->items?->count() ?? 0;
+                    @endphp
+
                     <tr>
                         <td><b>#{{ $r->id }}</b></td>
                         <td>#{{ $r->sale_id }}</td>
                         <td>{{ strtoupper($r->shop?->type ?? '') }} — {{ $r->shop?->name }}</td>
                         <td>{{ optional($r->created_at)->format('Y-m-d H:i') }}</td>
                         <td>{{ $r->user?->name ?? '—' }}</td>
-                        <td><b>{{ strtoupper($r->method) }}</b></td>
-                        <td class="text-end"><b>{{ number_format($r->refund_amount,2) }}</b></td>
-                        <td class="text-end">{{ number_format($r->return_cost_total ?? 0,2) }}</td>
+                        <td><b>{{ strtoupper($r->method ?? '-') }}</b></td>
+                        <td class="text-end"><b>{{ number_format((float)$r->refund_amount,2) }}</b></td>
+                        <td class="text-end">{{ number_format((float)($r->return_cost_total ?? 0),2) }}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary" type="button" data-toggle="collapse"
+                                data-target="#{{ $collapseId }}" aria-expanded="false"
+                                aria-controls="{{ $collapseId }}">
+                                View ({{ $countItems }})
+                            </button>
+                        </td>
                     </tr>
+
+                    {{-- ✅ details row --}}
+                    <tr>
+                        <td colspan="9" class="p-0">
+                            <div class="collapse" id="{{ $collapseId }}">
+                                <div class="p-3" style="background: rgba(15,23,42,0.03);">
+                                    @if($countItems === 0)
+                                    <div class="text-muted">No return items found for this return.</div>
+                                    @else
+                                    <div class="table-responsive">
+                                        <table class="table table-sm mb-0">
+                                            <thead>
+                                                <tr>
+                                                    <th>Item</th>
+                                                    <th>Barcode</th>
+                                                    <th>Qty</th>
+                                                    <th class="text-end">Unit</th>
+                                                    <th class="text-end">Line Refund</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach($r->items as $it)
+                                                @php
+                                                $name = $it->saleItem?->item_name
+                                                ?? $it->batch?->perfume?->name
+                                                ?? ('SaleItem#'.$it->sale_item_id);
+
+                                                $barcode = $it->saleItem?->barcode
+                                                ?? $it->batch?->barcode
+                                                ?? '-';
+                                                @endphp
+                                                <tr>
+                                                    <td><b>{{ $name }}</b></td>
+                                                    <td>{{ $barcode }}</td>
+                                                    <td>{{ (int)($it->quantity ?? 0) }}</td>
+                                                    <td class="text-end">{{ number_format((float)($it->unit_price ??
+                                                        0),2) }}</td>
+                                                    <td class="text-end"><b>{{ number_format((float)($it->line_refund ??
+                                                            0),2) }}</b></td>
+                                                </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    @endif
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+
                     @empty
                     <tr>
-                        <td colspan="8">No returns found.</td>
+                        <td colspan="9">No returns found.</td>
                     </tr>
                     @endforelse
                 </tbody>
