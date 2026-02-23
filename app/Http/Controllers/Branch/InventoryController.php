@@ -18,16 +18,35 @@ class InventoryController extends Controller
     }
 
     public function index()
-    {
-        $branch = $this->branchShopOrFail();
+{
+    $branch = $this->branchShopOrFail();
 
-        $batches = Batch::with('perfume')
-            ->where('shop_id', $branch->id)
-            ->orderByDesc('id')
-            ->get();
+    $batches = Batch::with('perfume')
+        ->where('shop_id', $branch->id)
+        ->orderByDesc('id')
+        ->get();
 
-        return view('panels.branch.inventory.index', compact('batches', 'branch'));
-    }
+    // ✅ Totals
+    $totalQty = $batches->sum('quantity');
+
+    $totalCost = $batches->sum(function ($b) {
+        return (float)$b->quantity * (float)($b->cost_price ?? 0);
+    });
+
+    $totalSell = $batches->sum(function ($b) {
+        return (float)$b->quantity * (float)($b->sell_price ?? 0);
+    });
+
+    return view('panels.branch.inventory.index', compact(
+        'batches',
+        'branch',
+        'totalQty',
+        'totalCost',
+        'totalSell'
+    ));
+}
+
+
 
     public function print(Request $request, Batch $batch)
     {

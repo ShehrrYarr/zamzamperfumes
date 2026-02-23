@@ -13,6 +13,29 @@
             </div>
         </div>
 
+        <div style="margin-top:14px; display:flex; gap:20px; flex-wrap:wrap;">
+            <div class="card" style="padding:14px 18px; min-width:180px;">
+                <div class="muted">Total Quantity</div>
+                <div style="font-size:20px; font-weight:900;">
+                    {{ number_format((float)($totalQty ?? 0)) }}
+                </div>
+            </div>
+        
+            <div class="card" style="padding:14px 18px; min-width:180px;">
+                <div class="muted">Total Cost Value</div>
+                <div style="font-size:20px; font-weight:900;">
+                    Rs {{ number_format((float)($totalCost ?? 0), 2) }}
+                </div>
+            </div>
+        
+            <div class="card" style="padding:14px 18px; min-width:180px;">
+                <div class="muted">Total Selling Value</div>
+                <div style="font-size:20px; font-weight:900;">
+                    Rs {{ number_format((float)($totalSell ?? 0), 2) }}
+                </div>
+            </div>
+        </div>
+
         <div style="margin-top:14px; overflow:auto;">
             <table style="width:100%; border-collapse:collapse;">
                 <thead>
