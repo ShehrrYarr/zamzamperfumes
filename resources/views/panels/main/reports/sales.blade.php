@@ -88,6 +88,15 @@
             <div class="hint">Filtered sales</div>
         </div>
     </div>
+    <div class="col-12">
+        <div class="card stat stat-blue">
+            <div class="k">Quantity Count</div>
+           <div class="v">  {{ number_format((float)($totals->qty_total ?? 0)) }}</div>
+            <div class="hint">Sold Quantity</div>
+        </div>
+    </div>
+
+    
 
     <div class="col-12">
         <div class="card stat stat-purple">
@@ -129,6 +138,7 @@
                             <th class="text-right">Cost</th>
                             <th class="text-right">Profit</th>
                             <th>Status</th>
+                            <th class="text-right" style="width:110px;">Qty</th>
                             <th style="width:110px;">Receipt</th>
                         </tr>
                     </thead>
@@ -167,6 +177,7 @@
                             <td class="text-right align-middle">{{ number_format($cost,2) }}</td>
                             <td class="text-right align-middle"><b>{{ number_format($p,2) }}</b></td>
                             <td class="align-middle">{{ $s->status ?? '-' }}</td>
+                            <td class="text-right"><b>{{ (int)($s->qty_total ?? 0) }}</b></td>
                             <td class="align-middle">
                                 <a class="btn btn-sm btn-primary" target="_blank"
                                     href="{{ route('main.pos.receipt', $s->id) }}">
