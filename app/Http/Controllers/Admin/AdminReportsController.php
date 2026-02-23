@@ -189,7 +189,6 @@ public function sales(Request $request)
         $st = $request->sale_type;
 
         if ($st === 'customer') {
-            // support old rows where sale_type might be NULL
             $salesQ->where(function ($qq) {
                 $qq->whereNull('sales.sale_type')
                    ->orWhere('sales.sale_type', 'customer');
@@ -208,6 +207,13 @@ public function sales(Request $request)
         ->selectRaw('COALESCE(SUM(sale_items.quantity * COALESCE(batches.cost_price,0)),0) as cost_total')
         ->groupBy('sale_items.sale_id');
 
+    // ✅ NEW: STRICT-SAFE qty subquery grouped by sale_id
+    $qtySub = DB::table('sale_items')
+        ->join('sales as s2', 's2.id', '=', 'sale_items.sale_id')
+        ->selectRaw('sale_items.sale_id as sale_id')
+        ->selectRaw('COALESCE(SUM(sale_items.quantity),0) as qty_total')
+        ->groupBy('sale_items.sale_id');
+
     // Apply SAME filters to costSub through "s"
     if ($request->filled('shop_id')) {
         $costSub->where('s.shop_id', (int)$request->shop_id);
@@ -218,18 +224,13 @@ public function sales(Request $request)
     if ($request->filled('to')) {
         $costSub->whereDate('s.created_at', '<=', $request->to);
     }
-
-    // ✅ same default status behavior
     if ($request->filled('status')) {
         $costSub->where('s.status', $request->status);
     } else {
         $costSub->whereIn('s.status', ['completed', 'partial_return']);
     }
-
-    // ✅ same sale_type behavior
     if ($request->filled('sale_type')) {
         $st = $request->sale_type;
-
         if ($st === 'customer') {
             $costSub->where(function ($qq) {
                 $qq->whereNull('s.sale_type')
@@ -240,17 +241,48 @@ public function sales(Request $request)
         }
     }
 
-    // Join costSub to sales list
+    // Apply SAME filters to qtySub through "s2"
+    if ($request->filled('shop_id')) {
+        $qtySub->where('s2.shop_id', (int)$request->shop_id);
+    }
+    if ($request->filled('from')) {
+        $qtySub->whereDate('s2.created_at', '>=', $request->from);
+    }
+    if ($request->filled('to')) {
+        $qtySub->whereDate('s2.created_at', '<=', $request->to);
+    }
+    if ($request->filled('status')) {
+        $qtySub->where('s2.status', $request->status);
+    } else {
+        $qtySub->whereIn('s2.status', ['completed', 'partial_return']);
+    }
+    if ($request->filled('sale_type')) {
+        $st = $request->sale_type;
+        if ($st === 'customer') {
+            $qtySub->where(function ($qq) {
+                $qq->whereNull('s2.sale_type')
+                   ->orWhere('s2.sale_type', 'customer');
+            });
+        } else {
+            $qtySub->where('s2.sale_type', $st);
+        }
+    }
+
+    // Join subs to sales list
     $q = (clone $salesQ)
         ->leftJoinSub($costSub, 'c', function ($join) {
             $join->on('c.sale_id', '=', 'sales.id');
         })
+        ->leftJoinSub($qtySub, 'qt', function ($join) {
+            $join->on('qt.sale_id', '=', 'sales.id');
+        })
         ->select('sales.*')
-        ->selectRaw('COALESCE(c.cost_total,0) as cost_total');
+        ->selectRaw('COALESCE(c.cost_total,0) as cost_total')
+        ->selectRaw('COALESCE(qt.qty_total,0) as qty_total');
 
     $sales = $q->paginate(25)->withQueryString();
 
-    // ✅ Load items after pagination
+    // Load items after pagination (used by collapse dropdown)
     $sales->getCollection()->load(['items']);
 
     // ✅ STRICT-SAFE totals
@@ -260,6 +292,7 @@ public function sales(Request $request)
         'sales_count'   => (int)(clone $totalsBase)->count(),
         'revenue_total' => (float)(clone $totalsBase)->sum('grand_total'),
         'cost_total'    => 0.0,
+        'qty_total'     => 0.0, // ✅ NEW
     ];
 
     // Total cost across filtered sales
@@ -268,24 +301,31 @@ public function sales(Request $request)
         ->join('sales', 'sales.id', '=', 'sale_items.sale_id')
         ->whereColumn('batches.shop_id', 'sales.shop_id');
 
+    // Total qty across filtered sales
+    $qtyTotalQ = DB::table('sale_items')
+        ->join('sales', 'sales.id', '=', 'sale_items.sale_id');
+
     if ($request->filled('shop_id')) {
         $costTotalQ->where('sales.shop_id', (int)$request->shop_id);
+        $qtyTotalQ->where('sales.shop_id', (int)$request->shop_id);
     }
     if ($request->filled('from')) {
         $costTotalQ->whereDate('sales.created_at', '>=', $request->from);
+        $qtyTotalQ->whereDate('sales.created_at', '>=', $request->from);
     }
     if ($request->filled('to')) {
         $costTotalQ->whereDate('sales.created_at', '<=', $request->to);
+        $qtyTotalQ->whereDate('sales.created_at', '<=', $request->to);
     }
 
-    // ✅ same default status behavior
     if ($request->filled('status')) {
         $costTotalQ->where('sales.status', $request->status);
+        $qtyTotalQ->where('sales.status', $request->status);
     } else {
         $costTotalQ->whereIn('sales.status', ['completed', 'partial_return']);
+        $qtyTotalQ->whereIn('sales.status', ['completed', 'partial_return']);
     }
 
-    // ✅ same sale_type behavior
     if ($request->filled('sale_type')) {
         $st = $request->sale_type;
 
@@ -294,14 +334,23 @@ public function sales(Request $request)
                 $qq->whereNull('sales.sale_type')
                    ->orWhere('sales.sale_type', 'customer');
             });
+            $qtyTotalQ->where(function ($qq) {
+                $qq->whereNull('sales.sale_type')
+                   ->orWhere('sales.sale_type', 'customer');
+            });
         } else {
             $costTotalQ->where('sales.sale_type', $st);
+            $qtyTotalQ->where('sales.sale_type', $st);
         }
     }
 
     $totals->cost_total = (float)$costTotalQ
         ->selectRaw('COALESCE(SUM(sale_items.quantity * COALESCE(batches.cost_price,0)),0) as cost_total')
         ->value('cost_total');
+
+    $totals->qty_total = (float)$qtyTotalQ
+        ->selectRaw('COALESCE(SUM(sale_items.quantity),0) as qty_total')
+        ->value('qty_total');
 
     $profit = (float)$totals->revenue_total - (float)$totals->cost_total;
 

@@ -77,6 +77,11 @@
                     </div>
                 </div>
                 <div class="col-md-3">
+                    <div class="alert alert-dark mb-0">
+                        <b>Qty Sold:</b> {{ number_format((float)($totals->qty_total ?? 0)) }}
+                    </div>
+                </div>
+                <div class="col-md-3">
                     <div class="alert alert-success mb-0">
                         <b>Total Revenue:</b> {{ number_format($revenue,2) }}
                     </div>
@@ -109,6 +114,7 @@
                         <th style="width:170px;">Date</th>
                         <th style="min-width:170px;">Cashier</th>
                         <th style="width:130px;">Status</th>
+                        <th class="text-right" style="width:110px;">Qty</th>
                         <th class="text-right" style="width:140px;">Revenue</th>
                         <th class="text-right" style="width:140px;">Cost</th>
                         <th class="text-right" style="width:140px;">Profit</th>
@@ -144,6 +150,7 @@
                                 {{ $s->status ?? '-' }}
                             </span>
                         </td>
+                        <td class="text-right"><b>{{ (int)($s->qty_total ?? 0) }}</b></td>
                         <td class="text-right"><b>{{ number_format($rev,2) }}</b></td>
                         <td class="text-right">{{ number_format($cst,2) }}</td>
                         <td class="text-right">
