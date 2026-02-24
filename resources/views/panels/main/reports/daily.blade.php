@@ -10,7 +10,7 @@
             <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;">
                 <div>
                     <div class="h1">Daily Report</div>
-                    <p class="muted">Batches added, sales, refunds, and net cash — all in one place.</p>
+                    <p class="muted">Batches added, sales, refunds, expenses and net cash — all in one place.</p>
                 </div>
 
                 <div style="display:flex; gap:10px; flex-wrap:wrap;">
@@ -35,14 +35,18 @@
         </div>
     </div>
 
-    {{-- NET CASH --}}
+    {{-- NET CASH AFTER EXPENSE --}}
     <div class="col-12">
         <div class="card stat stat-green">
-            <div class="k">Net Cash (Payments Today)</div>
-            <div class="v">{{ number_format($netTotals['total'] ?? 0, 2) }}</div>
+            <div class="k">Net Cash (After Expenses)</div>
+            <div class="v">{{ number_format($netTotals['total_after_expense'] ?? 0, 2) }}</div>
             <div class="hint">
-                Counter: <b>{{ number_format($netTotals['counter'] ?? 0, 2) }}</b>
+                Counter (before): <b>{{ number_format($netTotals['counter_before_expense'] ?? 0, 2) }}</b>
                 &nbsp; | &nbsp;
+                Expenses: <b>{{ number_format($netTotals['expenses'] ?? 0, 2) }}</b>
+                &nbsp; | &nbsp;
+                Counter (after): <b>{{ number_format($netTotals['counter_after_expense'] ?? 0, 2) }}</b>
+                <br>
                 Bank: <b>{{ number_format($netTotals['bank'] ?? 0, 2) }}</b>
             </div>
         </div>
@@ -57,10 +61,16 @@
                 Counter: <b>{{ number_format($refundTotals['counter'] ?? 0, 2) }}</b>
                 &nbsp; | &nbsp;
                 Bank: <b>{{ number_format($refundTotals['bank'] ?? 0, 2) }}</b>
-                <span style="display:block; font-size:12px; color:#6b7280;">
-                    Refunds reduce the same payment method’s cash automatically.
-                </span>
             </div>
+        </div>
+    </div>
+
+    {{-- EXPENSES --}}
+    <div class="col-12">
+        <div class="card stat stat-red">
+            <div class="k">Expenses Today (Affects Counter)</div>
+            <div class="v">{{ number_format($expensesTotal ?? 0, 2) }}</div>
+            <div class="hint">Expenses reduce counter cash only.</div>
         </div>
     </div>
 
@@ -85,7 +95,7 @@
             <div class="hint">
                 Gross Sales: <b>{{ number_format($salesTotals->gross_sales ?? 0, 2) }}</b>
                 <span style="display:block; font-size:12px; color:#6b7280;">
-                    Note: Money totals come from Payments section (net), not from gross sales.
+                    Money totals come from Payments section (net), not from gross sales.
                 </span>
             </div>
         </div>
@@ -148,6 +158,48 @@
                         @empty
                         <tr>
                             <td colspan="5" class="text-center py-4">No payments today.</td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    {{-- EXPENSES TABLE --}}
+    <div class="col-12">
+        <div class="card">
+            <div class="card-h">
+                <div class="h">Expenses Today</div>
+                <div class="sub">These reduce counter cash</div>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-sm mb-0">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Time</th>
+                            <th>Description</th>
+                            <th class="text-right">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($expenses as $e)
+                        <tr>
+                            <td>{{ $e->id }}</td>
+                            <td>{{ \Carbon\Carbon::parse($e->created_at)->format('H:i') }}</td>
+                            <td>
+                                {{ $e->title ?? $e->note ?? $e->description ?? '—' }}
+                                @if(!empty($e->category))
+                                <div class="text-muted" style="font-size:12px;">{{ $e->category }}</div>
+                                @endif
+                            </td>
+                            <td class="text-right"><b style="color:#dc2626;">{{ number_format((float)$e->amount, 2)
+                                    }}</b></td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="4" class="text-center py-4">No expenses today.</td>
                         </tr>
                         @endforelse
                     </tbody>
