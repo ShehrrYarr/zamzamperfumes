@@ -487,7 +487,11 @@ Route::post('/branch/accounts/{account}/entries', [\App\Http\Controllers\Branch\
 
 
 
+Route::get('/admin/batches/{batch}/edit-sell-price', [AdminBatchController::class, 'editSellPrice'])
+    ->name('admin.batches.edit_sell_price');
 
+Route::put('/admin/batches/{batch}/update-sell-price', [AdminBatchController::class, 'updateSellPrice'])
+    ->name('admin.batches.update_sell_price');
 
 
 

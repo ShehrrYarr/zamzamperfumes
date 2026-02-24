@@ -42,6 +42,7 @@
                         <th style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.10);">Cost</th>
                         <th style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.10);">Print</th>
                         <th style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.10);">Edit Qty</th>
+                        <th style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.10);">Edit Sell Price</th>
                     </tr>
                 </thead>
 
@@ -76,10 +77,19 @@
                             <span class="muted">—</span>
                             @endif
                         </td>
+                        <td style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.06);">
+                            @if(auth()->user()->role === 'admin')
+                            <a class="btn btn-sm btn-warn" target="_blank" href="{{ route('admin.batches.edit_sell_price', $b->id) }}">
+                                Edit Price
+                            </a>
+                            @else
+                            <span class="muted">—</span>
+                            @endif
+                        </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7" style="padding:12px; ">No batches found.</td>
+                        <td colspan="8" style="padding:12px; ">No batches found.</td>
                     </tr>
                     @endforelse
                 </tbody>
@@ -110,7 +120,7 @@
 
     function renderRows(rows){
         if(!rows || rows.length === 0){
-            body.innerHTML = `<tr><td colspan="7" style="padding:12px; color:rgba(255,255,255,0.65);">No batches found.</td></tr>`;
+            body.innerHTML = `<tr><td colspan="8" style="padding:12px; color:rgba(255,255,255,0.65);">No batches found.</td></tr>`;
             return;
         }
 
@@ -130,6 +140,13 @@
                         <a class="btn btn-sm btn-primary" href="${escHtml(r.edit_url)}">Edit</a>
                     @else
                         <span class="muted">—</span>
+                    @endif
+                </td>
+                <td style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.06);">
+                    @if(auth()->user()->role === 'admin')
+                    <a class="btn btn-sm btn-warn" target="_blank" href="${escHtml(r.edit_sell_price_url)}">Edit Price</a>
+                    @else
+                    <span class="muted">—</span>
                     @endif
                 </td>
               </tr>

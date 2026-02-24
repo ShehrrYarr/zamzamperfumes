@@ -50,6 +50,7 @@ private function assertAdmin(): void
                 'print_url' => route('admin.batches.print', $b->id),
                 // ✅ edit page (you will create this route/page)
                 'edit_url' => route('admin.batches.edit_qty', $b->id),
+                'edit_sell_price_url' => route('admin.batches.edit_sell_price', $b->id),
             ];
         });
 
@@ -173,5 +174,47 @@ public function updateQty(Request $request, Batch $batch)
         ->with('success', "Quantity updated for barcode {$batch->barcode}.");
 }
 
+
+public function editSellPrice(Batch $batch)
+{
+    abort_if(!auth()->check(), 403);
+    abort_if(auth()->user()->role !== 'admin', 403);
+
+    // We edit "globally" based on barcode
+    $barcode = $batch->barcode;
+
+    // Show how many batches will be impacted + where they exist
+    $targets = Batch::with('shop')
+        ->where('barcode', $barcode)
+        ->orderBy('shop_id')
+        ->get();
+
+    return view('admin.batches.edit_sell_price', compact('batch', 'targets', 'barcode'));
+}
+
+public function updateSellPrice(Request $request, Batch $batch)
+{
+    abort_if(!auth()->check(), 403);
+    abort_if(auth()->user()->role !== 'admin', 403);
+
+    $data = $request->validate([
+        'sell_price' => ['required', 'numeric', 'min:0'],
+    ]);
+
+    $barcode = $batch->barcode;
+    $newPrice = (float)$data['sell_price'];
+
+    DB::transaction(function () use ($barcode, $newPrice) {
+        // ✅ Update ALL batches across main + branches that share this barcode
+        Batch::where('barcode', $barcode)->update([
+            'sell_price' => $newPrice,
+            'updated_at' => now(),
+        ]);
+    });
+
+    return redirect()
+        ->route('admin.batches.index', ['q' => $barcode])
+        ->with('success', "Sell price updated for barcode {$barcode} in all shops/branches.");
+}
 
 }
