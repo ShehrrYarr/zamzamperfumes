@@ -102,7 +102,7 @@
                                     <div class="muted" style="margin-bottom:6px;">
                                         <b>{{ $it->batch?->perfume?->name ?? '—' }}</b>
                                         — {{ $it->batch?->barcode ?? '—' }}
-                                        — Qty: <b style="color:white;">{{ (int)$it->quantity }}</b>
+                                        — Qty: <b >{{ (int)$it->quantity }}</b>
                                     </div>
                                     @endforeach
                                 </div>
