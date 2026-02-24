@@ -105,135 +105,159 @@
     </div>
 
     <div class="card mt-3">
-        <div class="card-body" style="overflow:auto;">
-            <table class="table table-hover mb-0" style="min-width:1250px;">
-                <thead class="thead-light">
-                    <tr>
-                        <th style="width:110px;">Sale #</th>
-                        <th style="min-width:240px;">Shop</th>
-                        <th style="width:170px;">Date</th>
-                        <th style="min-width:170px;">Cashier</th>
-                        <th style="width:130px;">Status</th>
-                        <th class="text-right" style="width:110px;">Qty</th>
-                        <th class="text-right" style="width:140px;">Revenue</th>
-                        <th class="text-right" style="width:140px;">Cost</th>
-                        <th class="text-right" style="width:140px;">Profit</th>
-                        <th style="width:130px;">Receipt</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($sales as $s)
-                    @php
-                    $rev = (float)($s->grand_total ?? 0);
-                    $cst = (float)($s->cost_total ?? 0);
-                    $pf = $rev - $cst;
-
-                    $collapseId = 'saleItems_'.$s->id;
-
-                    // Receipt link based on shop type
-                    $receiptUrl = null;
-                    $type = $s->shop?->type;
-                    if ($type === 'main') $receiptUrl = route('main.pos.receipt', $s->id);
-                    if ($type === 'branch') $receiptUrl = route('branch.pos.receipt', $s->id);
-                    @endphp
-
-                    {{-- Main clickable row --}}
-                    <tr data-toggle="collapse" data-target="#{{ $collapseId }}" aria-expanded="false"
-                        aria-controls="{{ $collapseId }}" style="cursor:pointer;">
-                        <td><b>#{{ $s->id }}</b></td>
-                        <td>{{ strtoupper($s->shop?->type ?? '') }} — {{ $s->shop?->name ?? '—' }}</td>
-                        <td>{{ optional($s->created_at)->format('Y-m-d H:i') }}</td>
-                        <td>{{ $s->user?->name ?? '—' }}</td>
-                        <td>
-                            <span
-                                class="badge badge-{{ ($s->status==='returned') ? 'danger' : (($s->status==='partial_return') ? 'warning' : 'success') }}">
-                                {{ $s->status ?? '-' }}
-                            </span>
-                        </td>
-                        <td class="text-right"><b>{{ (int)($s->qty_total ?? 0) }}</b></td>
-                        <td class="text-right"><b>{{ number_format($rev,2) }}</b></td>
-                        <td class="text-right">{{ number_format($cst,2) }}</td>
-                        <td class="text-right">
-                            <b style="color:{{ $pf>=0 ? '#16a34a' : '#ef4444' }};">{{ number_format($pf,2) }}</b>
-                        </td>
-                        <td>
-                            @if($receiptUrl)
-                            <a class="btn btn-sm btn-outline-primary" target="_blank" href="{{ $receiptUrl }}"
-                                onclick="event.stopPropagation();">
-                                Open
-                            </a>
-                            @else
-                            <span class="text-muted">—</span>
-                            @endif
-                        </td>
-                    </tr>
-
-                    {{-- Collapsible items row --}}
-                    <tr class="collapse" id="{{ $collapseId }}">
-                        <td colspan="9" style="background:#f8fafc;">
-                            <div style="padding:12px;">
-                                <div class="d-flex flex-wrap justify-content-between align-items-center"
-                                    style="gap:10px;">
-                                    <div>
-                                        <b>Sale Items</b>
-                                        <span class="text-muted" style="font-size:12px;">
-                                            — #{{ $s->id }}
-                                        </span>
+        <div class="card-body">
+            <div class="table-responsive" style="overflow:auto;">
+                <table class="table table-hover mb-0" style="min-width:1250px;">
+                    <thead class="thead-light">
+                        <tr>
+                            <th style="width:110px;">Sale #</th>
+                            <th style="min-width:240px;">Shop</th>
+                            <th style="width:170px;">Date</th>
+                            <th style="min-width:170px;">Cashier</th>
+                            <th style="width:130px;">Status</th>
+                            <th class="text-right" style="width:110px;">Qty</th>
+                            <th class="text-right" style="width:140px;">Revenue</th>
+                            <th class="text-right" style="width:140px;">Cost</th>
+                            <th class="text-right" style="width:140px;">Profit</th>
+                            <th style="width:130px;">Receipt</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($sales as $s)
+                        @php
+                        $rev = (float)($s->grand_total ?? 0);
+                        $cst = (float)($s->cost_total ?? 0);
+                        $pf = $rev - $cst;
+                
+                        $collapseId = 'saleItems_'.$s->id;
+                
+                        // Receipt link based on shop type
+                        $receiptUrl = null;
+                        $type = $s->shop?->type;
+                        if ($type === 'main') $receiptUrl = route('main.pos.receipt', $s->id);
+                        if ($type === 'branch') $receiptUrl = route('branch.pos.receipt', $s->id);
+                        @endphp
+                
+                        {{-- Main clickable row --}}
+                        <tr data-toggle="collapse" data-target="#{{ $collapseId }}" aria-expanded="false"
+                            aria-controls="{{ $collapseId }}" style="cursor:pointer;">
+                            <td><b>#{{ $s->id }}</b></td>
+                            <td>{{ strtoupper($s->shop?->type ?? '') }} — {{ $s->shop?->name ?? '—' }}</td>
+                            <td>{{ optional($s->created_at)->format('Y-m-d H:i') }}</td>
+                            <td>{{ $s->user?->name ?? '—' }}</td>
+                            <td>
+                                <span
+                                    class="badge badge-{{ ($s->status==='returned') ? 'danger' : (($s->status==='partial_return') ? 'warning' : 'success') }}">
+                                    {{ $s->status ?? '-' }}
+                                </span>
+                            </td>
+                            <td class="text-right"><b>{{ (int)($s->qty_total ?? 0) }}</b></td>
+                            <td class="text-right"><b>{{ number_format($rev,2) }}</b></td>
+                            <td class="text-right">{{ number_format($cst,2) }}</td>
+                            <td class="text-right">
+                                <b style="color:{{ $pf>=0 ? '#16a34a' : '#ef4444' }};">{{ number_format($pf,2) }}</b>
+                            </td>
+                            <td>
+                                @if($receiptUrl)
+                                <a class="btn btn-sm btn-outline-primary" target="_blank" href="{{ $receiptUrl }}"
+                                    onclick="event.stopPropagation();">
+                                    Open
+                                </a>
+                                @else
+                                <span class="text-muted">—</span>
+                                @endif
+                            </td>
+                        </tr>
+                
+                        {{-- Collapsible items row --}}
+                        <tr class="collapse" id="{{ $collapseId }}">
+                            <td colspan="9" style="background:#f8fafc;">
+                                <div style="padding:12px;">
+                                    <div class="d-flex flex-wrap justify-content-between align-items-center" style="gap:10px;">
+                                        <div>
+                                            <b>Sale Items</b>
+                                            <span class="text-muted" style="font-size:12px;">
+                                                — #{{ $s->id }}
+                                            </span>
+                                        </div>
+                
+                                        <div class="text-muted" style="font-size:12px;">
+                                            Subtotal: <b>{{ number_format((float)($s->subtotal ?? 0), 2) }}</b>
+                                            &nbsp; | &nbsp; Discount: <b>{{ number_format((float)($s->discount_amount ?? 0),
+                                                2) }}</b>
+                                            &nbsp; | &nbsp; Grand: <b>{{ number_format((float)($s->grand_total ?? 0), 2)
+                                                }}</b>
+                                        </div>
                                     </div>
-
-                                    <div class="text-muted" style="font-size:12px;">
-                                        Subtotal: <b>{{ number_format((float)($s->subtotal ?? 0), 2) }}</b>
-                                        &nbsp; | &nbsp; Discount: <b>{{ number_format((float)($s->discount_amount ?? 0),
-                                            2) }}</b>
-                                        &nbsp; | &nbsp; Grand: <b>{{ number_format((float)($s->grand_total ?? 0), 2)
-                                            }}</b>
+                
+                                    <div class="table-responsive mt-2">
+                                        <table class="table table-sm table-bordered mb-0" style="background:white;">
+                                            <thead class="thead-light">
+                                                <tr>
+                                                    <th style="width:170px;">Barcode</th>
+                                                    <th>Item</th>
+                                                    <th class="text-right" style="width:110px;">Unit</th>
+                                                    <th class="text-right" style="width:90px;">Qty</th>
+                                                    <th class="text-right" style="width:130px;">Line Total</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @forelse($s->items as $it)
+                                                <tr>
+                                                    <td><b>{{ $it->barcode }}</b></td>
+                                                    <td>{{ $it->item_name }}</td>
+                                                    <td class="text-right">{{ number_format((float)$it->unit_price, 2) }}
+                                                    </td>
+                                                    <td class="text-right">{{ (int)$it->quantity }}</td>
+                                                    <td class="text-right"><b>{{ number_format((float)$it->line_total, 2)
+                                                            }}</b></td>
+                                                </tr>
+                                                @empty
+                                                <tr>
+                                                    <td colspan="5" class="text-center text-muted py-3">No items found.</td>
+                                                </tr>
+                                                @endforelse
+                                            </tbody>
+                                        </table>
                                     </div>
                                 </div>
+                            </td>
+                        </tr>
+                
+                        @empty
+                        <tr>
+                            <td colspan="9" class="text-center py-4">No sales found.</td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+    
+            {{-- ✅ Pagination centered + stable --}}
+            <div class="d-flex justify-content-center mt-3">
+                {{ $sales->onEachSide(1)->links('pagination::bootstrap-4') }}
+            </div>
+        </div>
+    </div>
 
-                                <div class="table-responsive mt-2">
-                                    <table class="table table-sm table-bordered mb-0" style="background:white;">
-                                        <thead class="thead-light">
-                                            <tr>
-                                                <th style="width:170px;">Barcode</th>
-                                                <th>Item</th>
-                                                <th class="text-right" style="width:110px;">Unit</th>
-                                                <th class="text-right" style="width:90px;">Qty</th>
-                                                <th class="text-right" style="width:130px;">Line Total</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @forelse($s->items as $it)
-                                            <tr>
-                                                <td><b>{{ $it->barcode }}</b></td>
-                                                <td>{{ $it->item_name }}</td>
-                                                <td class="text-right">{{ number_format((float)$it->unit_price, 2) }}
-                                                </td>
-                                                <td class="text-right">{{ (int)$it->quantity }}</td>
-                                                <td class="text-right"><b>{{ number_format((float)$it->line_total, 2)
-                                                        }}</b></td>
-                                            </tr>
-                                            @empty
-                                            <tr>
-                                                <td colspan="5" class="text-center text-muted py-3">No items found.</td>
-                                            </tr>
-                                            @endforelse
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </td>
-                    </tr>
 
-                    @empty
-                    <tr>
-                        <td colspan="9" class="text-center py-4">No sales found.</td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
-            <div class="mt-3">{{ $sales->links() }}</div>
-
-            
+    <div class="card mt-3">
+        <div class="card-body">
+            <h5 style="margin:0; font-weight:800;">Perfume Sold Summary</h5>
+            <div style="color:#6b7280;font-size:13px; margin-top:4px;">
+                Shows total quantity sold per perfume for the current filters.
+            </div>
+    
+            <div class="mt-3" style="display:flex; flex-wrap:wrap; gap:10px;">
+                @forelse($perfumeSold as $p)
+                <div class="alert alert-light mb-0" style="border:1px solid #e5e7eb;">
+                    <b>{{ $p->perfume_name }}</b>
+                    <span class="text-muted"> ({{ (int)$p->qty_sold }})</span>
+                </div>
+                @empty
+                <div class="text-muted">No perfume sales found for these filters.</div>
+                @endforelse
+            </div>
         </div>
     </div>
 </div>

@@ -354,7 +354,54 @@ public function sales(Request $request)
 
     $profit = (float)$totals->revenue_total - (float)$totals->cost_total;
 
-    return view('admin.reports.sales', compact('sales', 'totals', 'profit', 'shops'));
+
+    // ✅ Perfume-wise sold qty summary (based on SAME filters)
+$perfumeSoldQ = DB::table('sale_items')
+    ->join('sales', 'sales.id', '=', 'sale_items.sale_id')
+    ->join('batches', 'batches.id', '=', 'sale_items.batch_id')
+    ->join('perfumes', 'perfumes.id', '=', 'batches.perfume_id')
+    ->whereColumn('batches.shop_id', 'sales.shop_id') // strict-safe
+
+    ->selectRaw('perfumes.id as perfume_id')
+    ->selectRaw('perfumes.name as perfume_name')
+    ->selectRaw('COALESCE(SUM(sale_items.quantity),0) as qty_sold')
+    ->groupBy('perfumes.id', 'perfumes.name')
+    ->orderByDesc('qty_sold');
+
+// Apply SAME filters as your report
+if ($request->filled('shop_id')) {
+    $perfumeSoldQ->where('sales.shop_id', (int)$request->shop_id);
+}
+if ($request->filled('from')) {
+    $perfumeSoldQ->whereDate('sales.created_at', '>=', $request->from);
+}
+if ($request->filled('to')) {
+    $perfumeSoldQ->whereDate('sales.created_at', '<=', $request->to);
+}
+
+// Default status behavior (same as report)
+if ($request->filled('status')) {
+    $perfumeSoldQ->where('sales.status', $request->status);
+} else {
+    $perfumeSoldQ->whereIn('sales.status', ['completed', 'partial_return']);
+}
+
+// Same sale_type behavior (customer supports NULL)
+if ($request->filled('sale_type')) {
+    $st = $request->sale_type;
+    if ($st === 'customer') {
+        $perfumeSoldQ->where(function ($qq) {
+            $qq->whereNull('sales.sale_type')
+               ->orWhere('sales.sale_type', 'customer');
+        });
+    } else {
+        $perfumeSoldQ->where('sales.sale_type', $st);
+    }
+}
+
+$perfumeSold = $perfumeSoldQ->limit(200)->get();
+
+   return view('admin.reports.sales', compact('sales', 'totals', 'profit', 'shops', 'perfumeSold'));
 }
 
 public function returns(Request $request)
