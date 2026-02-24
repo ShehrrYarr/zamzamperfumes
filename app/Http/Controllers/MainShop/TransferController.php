@@ -158,17 +158,53 @@ class TransferController extends Controller
             ->with('success', 'Transfer created. Secret Code: ' . $transfer->code);
     }
 
-    public function cancel(BatchTransfer $transfer)
-    {
-        $mainShop = $this->mainShopOrFail();
+   public function cancel(BatchTransfer $transfer)
+{
+    $mainShop = $this->mainShopOrFail();
 
-        abort_if((int)$transfer->from_shop_id !== (int)$mainShop->id, 403);
-        abort_if($transfer->status !== 'pending', 422, 'Only pending transfers can be cancelled.');
+    abort_if((int)$transfer->from_shop_id !== (int)$mainShop->id, 403);
+    abort_if($transfer->status !== 'pending', 422, 'Only pending transfers can be cancelled.');
 
-        // If you want: restore quantities on cancel (optional) — we can do later.
-        $transfer->status = 'cancelled';
-        $transfer->save();
+    DB::transaction(function () use ($transfer, $mainShop) {
 
-        return back()->with('success', 'Transfer cancelled: ' . $transfer->code);
-    }
+        // Reload & lock the transfer row to avoid double-cancel race
+        $t = BatchTransfer::where('id', $transfer->id)
+            ->lockForUpdate()
+            ->firstOrFail();
+
+        abort_if($t->status !== 'pending', 422, 'Only pending transfers can be cancelled.');
+
+        // Load items (what was deducted)
+        $items = BatchTransferItem::where('batch_transfer_id', $t->id)->get();
+
+        if ($items->isNotEmpty()) {
+            $batchIds = $items->pluck('batch_id')->unique()->values()->all();
+
+            // Lock all involved batches in main shop
+            $batches = Batch::query()
+                ->where('shop_id', $mainShop->id)
+                ->whereIn('id', $batchIds)
+                ->lockForUpdate()
+                ->get()
+                ->keyBy('id');
+
+            // Restore quantities
+            foreach ($items as $it) {
+                $bid = (int)$it->batch_id;
+                $qty = (int)$it->quantity;
+
+                $batch = $batches->get($bid);
+                abort_if(!$batch, 422, "Batch not found in main inventory for restore (batch_id={$bid}).");
+
+                $batch->increment('quantity', $qty);
+            }
+        }
+
+        // Mark cancelled (after restore)
+        $t->status = 'cancelled';
+        $t->save();
+    });
+
+    return back()->with('success', 'Transfer cancelled (stock restored): ' . $transfer->code);
+}
 }
