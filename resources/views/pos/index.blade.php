@@ -769,17 +769,18 @@
                         {{-- Cart Table --}}
                         <div class="table-wrap">
                             <table style="min-width:560px;">
-                                <thead>
-                                    <tr>
-                                        <th>Item</th>
-                                        <th>Qty</th>
-                                        <th class="right">Subtotal</th>
-                                        <th class="right">Action</th>
-                                    </tr>
-                                </thead>
+                               <thead>
+                                <tr>
+                                    <th>Item</th>
+                                    <th>Qty</th>
+                                    <th class="right">Unit Price</th>
+                                    <th class="right">Subtotal</th>
+                                    <th class="right">Action</th>
+                                </tr>
+                            </thead>
                                 <tbody id="cartBody">
                                     <tr>
-                                        <td colspan="4" class="small">Cart is empty.</td>
+                                        <td colspan="5" class="small">Cart is empty.</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -1154,22 +1155,37 @@
     }
 
     cartBody.innerHTML = cartState.map(c => {
-      const line = (Number(c.price||0) * Number(c.qty||0));
-      return `
-        <tr>
-          <td>
+    const unit = Number(c.price || 0);
+    const qty = Number(c.qty || 0);
+    const line = unit * qty;
+    
+    return `
+    <tr>
+        <td>
             <b>${c.perfume}</b>
             <div class="small">${c.barcode}</div>
             <div class="small">Available: ${c.available}</div>
-          </td>
-          <td style="width:140px;">
-            <input class="input" style="min-width:auto; width:110px; padding:10px 10px;"
-                   type="number" min="1" max="${c.available}" value="${c.qty}" data-qty="${c.batch_id}">
-          </td>
-          <td class="right"><b>${money(line)}</b><div class="small">${money(c.price)} each</div></td>
-          <td class="right"><button class="btn btn-danger" data-remove="${c.batch_id}">Remove</button></td>
-        </tr>
-      `;
+        </td>
+    
+        <td style="width:140px;">
+            <input class="input" style="min-width:auto; width:110px; padding:10px 10px;" type="number" min="1"
+                max="${c.available}" value="${qty}" data-qty="${c.batch_id}">
+        </td>
+    
+        <td class="right" style="width:160px;">
+            <input class="input" style="min-width:auto; width:120px; padding:10px 10px; text-align:right;" type="number"
+                min="0" step="0.01" value="${money(unit)}" data-price="${c.batch_id}">
+        </td>
+    
+        <td class="right" style="width:160px;">
+            <b>${money(line)}</b>
+        </td>
+    
+        <td class="right" style="width:140px;">
+            <button class="btn btn-danger" data-remove="${c.batch_id}">Remove</button>
+        </td>
+    </tr>
+    `;
     }).join('');
 
     cartItemsCount.textContent = String(cartState.length);
@@ -1189,6 +1205,17 @@
       });
     });
 
+    cartBody.querySelectorAll('[data-price]').forEach(inp => {
+    inp.addEventListener('change', async () => {
+    const batchId = Number(inp.getAttribute('data-price'));
+    const price = Number(inp.value);
+    
+    if (isNaN(price) || price < 0) { showToast('Invalid price', 'error' ); await loadCart(); return; } try{ const data=await
+        httpPost(routes.update, { batch_id: batchId, price }); renderCart(data.cart); showToast('Price updated'); }catch(e){
+        showToast('Price update failed: ' + e.message, ' error'); await loadCart(); } }); });
+
+
+        
     cartBody.querySelectorAll('[data-remove]').forEach(btn => {
       btn.addEventListener('click', async () => {
         const batchId = Number(btn.getAttribute('data-remove'));

@@ -34,21 +34,21 @@ class CheckoutController extends Controller
         $user = auth()->user();
 
         $data = $request->validate([
-            'customer_name' => ['nullable','string','max:255'],
+            'customer_name'  => ['nullable','string','max:255'],
             'customer_phone' => ['nullable','string','max:30'],
 
-            'discount_type' => ['required','in:none,flat,percent'],
+            'discount_type'  => ['required','in:none,flat,percent'],
             'discount_value' => ['required','numeric','min:0'],
 
             'payment_method' => ['required','in:counter,bank'],
-            'bank_id' => ['nullable','integer'],
+            'bank_id'        => ['nullable','integer'],
         ]);
 
         // Walk-in behavior
-        $customerName = trim((string)($data['customer_name'] ?? ''));
+        $customerName  = trim((string)($data['customer_name'] ?? ''));
         $customerPhone = trim((string)($data['customer_phone'] ?? ''));
 
-        if ($customerName === '') $customerName = null;
+        if ($customerName === '')  $customerName = null;
         if ($customerPhone === '') $customerPhone = null;
 
         $cart = session()->get($this->cartKey($shop->id), []);
@@ -63,6 +63,7 @@ class CheckoutController extends Controller
             if (empty($data['bank_id'])) {
                 return response()->json(['ok' => false, 'message' => 'Please select a bank.'], 422);
             }
+
             $bank = Bank::where('id', $data['bank_id'])
                 ->where('shop_id', $shop->id)
                 ->where('is_active', true)
@@ -74,17 +75,21 @@ class CheckoutController extends Controller
         }
 
         try {
-            $result = DB::transaction(function () use ($shop, $user, $data, $customerName, $customerPhone, $cartLines) {
-
+            $sale = DB::transaction(function () use (
+                $shop, $user, $data, $customerName, $customerPhone, $cartLines
+            ) {
                 // 1) Re-check stock with locks, calculate subtotal
-                $subtotal = 0;
+                $subtotal = 0.0;
 
                 // We'll lock each batch row to prevent race conditions
-                $lockedBatches = [];
+                $lockedBatches = []; // [batchId => [$batch, $unitPrice, $lineTotal, $qty]]
 
                 foreach ($cartLines as $line) {
-                    $batchId = (int)$line['batch_id'];
-                    $qty = (int)$line['qty'];
+                    $batchId = (int)($line['batch_id'] ?? 0);
+                    $qty     = (int)($line['qty'] ?? 0);
+
+                    abort_if($batchId <= 0, 422, 'Invalid item in cart.');
+                    abort_if($qty < 1, 422, 'Invalid quantity.');
 
                     $batch = Batch::with('perfume')
                         ->where('id', $batchId)
@@ -92,15 +97,26 @@ class CheckoutController extends Controller
                         ->lockForUpdate()
                         ->firstOrFail();
 
-                    if ($qty < 1) {
-                        abort(422, 'Invalid quantity.');
-                    }
-
                     if ((int)$batch->quantity < $qty) {
                         abort(422, "Insufficient stock for barcode {$batch->barcode}.");
                     }
 
-                    $unitPrice = (float)($batch->sell_price ?? 0);
+                    // ✅ USE EDITABLE CART PRICE (fallback to batch sell_price)
+                    $rawCartPrice = $line['price'] ?? null;
+
+                    if ($rawCartPrice === null || $rawCartPrice === '') {
+                        $unitPrice = (float)($batch->sell_price ?? 0);
+                    } else {
+                        // validate numeric & non-negative
+                        if (!is_numeric($rawCartPrice)) {
+                            abort(422, "Invalid price for barcode {$batch->barcode}.");
+                        }
+                        $unitPrice = (float)$rawCartPrice;
+                        if ($unitPrice < 0) {
+                            abort(422, "Invalid price for barcode {$batch->barcode}.");
+                        }
+                    }
+
                     $lineTotal = $unitPrice * $qty;
                     $subtotal += $lineTotal;
 
@@ -108,7 +124,7 @@ class CheckoutController extends Controller
                 }
 
                 // 2) Discount compute
-                $discountType = $data['discount_type'];
+                $discountType  = $data['discount_type'];
                 $discountValue = (float)$data['discount_value'];
                 $discountAmount = 0.0;
 
@@ -123,16 +139,16 @@ class CheckoutController extends Controller
 
                 // 3) Create sale
                 $sale = Sale::create([
-                    'shop_id' => $shop->id,
-                    'user_id' => $user->id,
-                    'customer_name' => $customerName,
-                    'customer_phone' => $customerPhone,
-                    'subtotal' => round($subtotal, 2),
-                    'discount_type' => $discountType,
-                    'discount_value' => round($discountValue, 2),
+                    'shop_id'         => $shop->id,
+                    'user_id'         => $user->id,
+                    'customer_name'   => $customerName,
+                    'customer_phone'  => $customerPhone,
+                    'subtotal'        => round($subtotal, 2),
+                    'discount_type'   => $discountType,
+                    'discount_value'  => round($discountValue, 2),
                     'discount_amount' => round($discountAmount, 2),
-                    'grand_total' => round($grandTotal, 2),
-                    'status' => 'completed',
+                    'grand_total'     => round($grandTotal, 2),
+                    'status'          => 'completed',
                 ]);
 
                 // 4) Create items + deduct stock
@@ -141,14 +157,14 @@ class CheckoutController extends Controller
                     [$batch, $unitPrice, $lineTotal, $qty] = $arr;
 
                     SaleItem::create([
-                        'sale_id' => $sale->id,
-                        'batch_id' => $batch->id,
-                        'barcode' => $batch->barcode,
-                        'item_name' => $batch->perfume?->name ?? ('Batch#'.$batch->id),
-                        'unit_price' => round($unitPrice, 2),
-                        'quantity' => $qty,
-                        'original_quantity' => $qty,
-                        'line_total' => round($lineTotal, 2),
+                        'sale_id'            => $sale->id,
+                        'batch_id'           => $batch->id,
+                        'barcode'            => $batch->barcode,
+                        'item_name'          => $batch->perfume?->name ?? ('Batch#'.$batch->id),
+                        'unit_price'         => round($unitPrice, 2),   // ✅ editable price saved
+                        'quantity'           => $qty,
+                        'original_quantity'  => $qty,
+                        'line_total'         => round($lineTotal, 2),   // ✅ editable price total
                     ]);
 
                     $batch->quantity = (int)$batch->quantity - (int)$qty;
@@ -159,9 +175,9 @@ class CheckoutController extends Controller
                 Payment::create([
                     'shop_id' => $shop->id,
                     'sale_id' => $sale->id,
-                    'method' => $data['payment_method'],
+                    'method'  => $data['payment_method'],
                     'bank_id' => $data['payment_method'] === 'bank' ? (int)$data['bank_id'] : null,
-                    'amount' => round($grandTotal, 2),
+                    'amount'  => round($grandTotal, 2),
                     'paid_at' => now(),
                 ]);
 
@@ -171,21 +187,20 @@ class CheckoutController extends Controller
             // Clear cart only if everything succeeded
             session()->forget($this->cartKey($shop->id));
 
-          return response()->json([
-    'ok' => true,
-    'sale_id' => $result->id,
-    'message' => 'Sale completed.',
-    'receipt_url' => route(
-        auth()->user()->role === 'main_shop' ? 'main.pos.receipt' : 'branch.pos.receipt',
-        $result->id
-    ),
-]);
+            return response()->json([
+                'ok'          => true,
+                'sale_id'     => $sale->id,
+                'message'     => 'Sale completed.',
+                'receipt_url' => route(
+                    auth()->user()->role === 'main_shop' ? 'main.pos.receipt' : 'branch.pos.receipt',
+                    $sale->id
+                ),
+            ]);
 
         } catch (Throwable $e) {
-            // Transaction auto-rollbacks if exception thrown
             return response()->json([
-                'ok' => false,
-                'message' => 'Checkout failed: '.$e->getMessage(),
+                'ok'      => false,
+                'message' => 'Checkout failed: ' . $e->getMessage(),
             ], 500);
         }
     }
