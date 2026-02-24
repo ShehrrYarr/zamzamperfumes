@@ -52,6 +52,7 @@
                 <a class="btn btn-primary btn-sm" href="{{ route('main.reports.batches') }}">Batch</a>
                 <a class="btn btn-primary btn-sm" href="{{ route('main.reports.sales') }}">Sales</a>
                 <a class="btn btn-primary btn-sm" href="{{ route('main.reports.returns') }}">Returns</a>
+                <a class="btn btn-primary btn-sm" href="{{ route('main.reports.daily') }}">Daily Report</a>
             </div>
         </div>
     </div>

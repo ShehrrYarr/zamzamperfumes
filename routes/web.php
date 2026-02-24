@@ -53,6 +53,7 @@ use App\Http\Controllers\Branch\TransferClaimController;
 use App\Http\Controllers\Branch\InventoryController;
 use App\Http\Controllers\MainShop\InventoryController as MainInventoryController;
 use App\Http\Controllers\MainShop\MainShop\ExpenseController;
+use App\Http\Controllers\MainShop\MainShop\DailyReportController;
 use App\Http\Controllers\Branch\TransferHistoryController;
 use App\Http\Controllers\Branch\BranchAccountsController;
 use App\Http\Controllers\POS\MainPosController;
@@ -495,7 +496,11 @@ Route::put('/admin/batches/{batch}/update-sell-price', [AdminBatchController::cl
 
 
 
+Route::get('/main/reports/daily', [\App\Http\Controllers\MainShop\DailyReportController::class, 'index'])
+    ->name('main.reports.daily');
 
+Route::get('/main/reports/daily/pdf', [\App\Http\Controllers\MainShop\DailyReportController::class, 'pdf'])
+    ->name('main.reports.daily.pdf');
 
 
 
