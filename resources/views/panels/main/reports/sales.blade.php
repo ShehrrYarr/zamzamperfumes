@@ -251,24 +251,43 @@
                 </table>
             </div>
 
-            <div class="mt-3">
-                {{ $sales->links() }}
+           <div class="d-flex justify-content-center mt-3">
+                {{ $sales->onEachSide(1)->links('pagination::bootstrap-4') }}
+            </div>
+        </div>
+    </div>
+
+    {{-- Perfume-wise Sold Qty --}}
+    <div class="col-12">
+        <div class="card">
+            <div class="card-h">
+                <div>
+                    <div class="h">Perfume-wise Sold Quantity</div>
+                    <div class="sub">Top sold items for the selected filters</div>
+                </div>
+            </div>
+    
+            <div class="card-b">
+                @if(($perfumeSummary ?? collect())->count() === 0)
+                <div class="muted">No data for selected filters.</div>
+                @else
+                <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                    @foreach($perfumeSummary as $row)
+                    <span class="badge" style="background:rgba(255,255,255,0.75);">
+                        <b>{{ $row->name }}</b>
+                        <span style="opacity:.7;">({{ (int)$row->qty }})</span>
+                    </span>
+                    @endforeach
+                </div>
+                <div class="muted" style="font-size:12px;margin-top:8px;">
+                    Showing top {{ ($perfumeSummary ?? collect())->count() }} items.
+                </div>
+                @endif
             </div>
         </div>
     </div>
 </div>
-<script src="https://code.jquery.com/jquery-3.5.1.min.js"
-    integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
 
-<!-- Popper (required for Bootstrap tooltips/collapse positioning) -->
-<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
-    integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous">
-</script>
-
-<!-- Bootstrap JS -->
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
-    integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous">
-</script>
 <script>
     (function(){
   var payment = document.getElementById('paymentMethod');

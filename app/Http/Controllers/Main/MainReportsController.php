@@ -68,14 +68,10 @@ class MainReportsController extends Controller
         ->orderBy('name')
         ->get();
 
-    // Base sales query
+    // Base sales query (list)
     $salesBase = Sale::query()
         ->where('sales.shop_id', $shopId)
-        ->with([
-            'shop',
-            'user',
-            'items'
-        ])
+        ->with(['shop','user','items'])
         ->orderByDesc('sales.id');
 
     if ($request->filled('from')) {
@@ -85,14 +81,14 @@ class MainReportsController extends Controller
         $salesBase->whereDate('sales.created_at', '<=', $request->to);
     }
 
-    // ✅ Default behavior: exclude fully returned sales unless status filter is applied
+    // default: exclude fully returned unless status filter applied
     if ($request->filled('status')) {
         $salesBase->where('sales.status', $request->status);
     } else {
         $salesBase->whereIn('sales.status', ['completed', 'partial_return']);
     }
 
-    // ✅ Sale type filter
+    // sale_type filter
     if ($request->filled('sale_type')) {
         $st = $request->sale_type;
 
@@ -106,10 +102,7 @@ class MainReportsController extends Controller
         }
     }
 
-    /**
-     * Payment filters (from payments table)
-     * Filter sales that HAVE at least one payment matching
-     */
+    // payment filters (sale must have at least one matching payment)
     if ($request->filled('payment_method')) {
         $pm = $request->payment_method; // counter|bank
         $salesBase->whereExists(function ($q) use ($pm) {
@@ -119,7 +112,6 @@ class MainReportsController extends Controller
               ->where('payments.method', $pm);
         });
     }
-
     if ($request->filled('bank_id')) {
         $bankId = (int) $request->bank_id;
         $salesBase->whereExists(function ($q) use ($bankId) {
@@ -131,7 +123,7 @@ class MainReportsController extends Controller
     }
 
     /**
-     * ✅ Cost subquery (strict safe)
+     * cost per sale
      */
     $costSub = DB::table('sale_items')
         ->join('batches', 'batches.id', '=', 'sale_items.batch_id')
@@ -143,7 +135,7 @@ class MainReportsController extends Controller
         ->groupBy('sale_items.sale_id');
 
     /**
-     * ✅ NEW: Qty subquery (strict safe): SUM(sale_items.quantity) per sale
+     * qty per sale
      */
     $qtySub = DB::table('sale_items')
         ->join('sales as s2', 's2.id', '=', 'sale_items.sale_id')
@@ -152,62 +144,83 @@ class MainReportsController extends Controller
         ->selectRaw('COALESCE(SUM(sale_items.quantity),0) as qty_total')
         ->groupBy('sale_items.sale_id');
 
-    // Apply SAME date/status/type filters to costSub via s
-    if ($request->filled('from')) {
-        $costSub->whereDate('s.created_at', '>=', $request->from);
-    }
-    if ($request->filled('to')) {
-        $costSub->whereDate('s.created_at', '<=', $request->to);
-    }
+    // Apply SAME filters to costSub via s
+    if ($request->filled('from')) $costSub->whereDate('s.created_at', '>=', $request->from);
+    if ($request->filled('to'))   $costSub->whereDate('s.created_at', '<=', $request->to);
 
-    if ($request->filled('status')) {
-        $costSub->where('s.status', $request->status);
-    } else {
-        $costSub->whereIn('s.status', ['completed', 'partial_return']);
-    }
+    if ($request->filled('status')) $costSub->where('s.status', $request->status);
+    else $costSub->whereIn('s.status', ['completed', 'partial_return']);
 
     if ($request->filled('sale_type')) {
         $st = $request->sale_type;
-
         if ($st === 'customer') {
             $costSub->where(function ($qq) {
-                $qq->whereNull('s.sale_type')
-                   ->orWhere('s.sale_type', 'customer');
+                $qq->whereNull('s.sale_type')->orWhere('s.sale_type', 'customer');
             });
         } else {
             $costSub->where('s.sale_type', $st);
         }
     }
 
-    // Apply SAME date/status/type filters to qtySub via s2
-    if ($request->filled('from')) {
-        $qtySub->whereDate('s2.created_at', '>=', $request->from);
+    // Payment filters must be applied to subqueries too (otherwise mismatch)
+    if ($request->filled('payment_method')) {
+        $pm = $request->payment_method;
+        $costSub->whereExists(function ($q) use ($pm) {
+            $q->selectRaw('1')
+              ->from('payments')
+              ->whereColumn('payments.sale_id', 's.id')
+              ->where('payments.method', $pm);
+        });
     }
-    if ($request->filled('to')) {
-        $qtySub->whereDate('s2.created_at', '<=', $request->to);
+    if ($request->filled('bank_id')) {
+        $bankId = (int)$request->bank_id;
+        $costSub->whereExists(function ($q) use ($bankId) {
+            $q->selectRaw('1')
+              ->from('payments')
+              ->whereColumn('payments.sale_id', 's.id')
+              ->where('payments.bank_id', $bankId);
+        });
     }
 
-    if ($request->filled('status')) {
-        $qtySub->where('s2.status', $request->status);
-    } else {
-        $qtySub->whereIn('s2.status', ['completed', 'partial_return']);
-    }
+    // Apply SAME filters to qtySub via s2
+    if ($request->filled('from')) $qtySub->whereDate('s2.created_at', '>=', $request->from);
+    if ($request->filled('to'))   $qtySub->whereDate('s2.created_at', '<=', $request->to);
+
+    if ($request->filled('status')) $qtySub->where('s2.status', $request->status);
+    else $qtySub->whereIn('s2.status', ['completed', 'partial_return']);
 
     if ($request->filled('sale_type')) {
         $st = $request->sale_type;
-
         if ($st === 'customer') {
             $qtySub->where(function ($qq) {
-                $qq->whereNull('s2.sale_type')
-                   ->orWhere('s2.sale_type', 'customer');
+                $qq->whereNull('s2.sale_type')->orWhere('s2.sale_type', 'customer');
             });
         } else {
             $qtySub->where('s2.sale_type', $st);
         }
     }
 
+    if ($request->filled('payment_method')) {
+        $pm = $request->payment_method;
+        $qtySub->whereExists(function ($q) use ($pm) {
+            $q->selectRaw('1')
+              ->from('payments')
+              ->whereColumn('payments.sale_id', 's2.id')
+              ->where('payments.method', $pm);
+        });
+    }
+    if ($request->filled('bank_id')) {
+        $bankId = (int)$request->bank_id;
+        $qtySub->whereExists(function ($q) use ($bankId) {
+            $q->selectRaw('1')
+              ->from('payments')
+              ->whereColumn('payments.sale_id', 's2.id')
+              ->where('payments.bank_id', $bankId);
+        });
+    }
+
     /**
-     * Payment info subquery: one method/bank per sale (most recent payment)
+     * payment info subquery (latest payment)
      */
     $paymentSub = DB::table('payments as p')
         ->selectRaw('p.sale_id')
@@ -223,17 +236,11 @@ class MainReportsController extends Controller
         ->selectRaw('p2.method as payment_method')
         ->selectRaw('b2.name as bank_name');
 
-    // Final query (sales + cost_total + qty_total + payment info)
+    // Final list query
     $q = (clone $salesBase)
-        ->leftJoinSub($costSub, 'c', function ($join) {
-            $join->on('c.sale_id', '=', 'sales.id');
-        })
-        ->leftJoinSub($qtySub, 'qt', function ($join) {
-            $join->on('qt.sale_id', '=', 'sales.id');
-        })
-        ->leftJoinSub($paymentInfoSub, 'pi', function ($join) {
-            $join->on('pi.sale_id', '=', 'sales.id');
-        })
+        ->leftJoinSub($costSub, 'c', fn($join) => $join->on('c.sale_id', '=', 'sales.id'))
+        ->leftJoinSub($qtySub, 'qt', fn($join) => $join->on('qt.sale_id', '=', 'sales.id'))
+        ->leftJoinSub($paymentInfoSub, 'pi', fn($join) => $join->on('pi.sale_id', '=', 'sales.id'))
         ->select('sales.*')
         ->selectRaw('COALESCE(c.cost_total,0) as cost_total')
         ->selectRaw('COALESCE(qt.qty_total,0) as qty_total')
@@ -242,17 +249,17 @@ class MainReportsController extends Controller
 
     $sales = $q->paginate(25)->withQueryString();
 
-    // Totals (strict safe)
+    // Totals
     $totalsBase = (clone $salesBase)->reorder();
 
-    $totals = (object) [
-        'sales_count'   => (int) (clone $totalsBase)->count(),
-        'revenue_total' => (float) (clone $totalsBase)->sum('grand_total'),
+    $totals = (object)[
+        'sales_count'   => (int)(clone $totalsBase)->count(),
+        'revenue_total' => (float)(clone $totalsBase)->sum('grand_total'),
         'cost_total'    => 0.0,
-        'qty_total'     => 0.0, // ✅ NEW
+        'qty_total'     => 0.0,
     ];
 
-    // Cost total across filtered sales
+    // Cost total across filtered sales (must include payment filters too)
     $costTotalQ = DB::table('sale_items')
         ->join('batches', 'batches.id', '=', 'sale_items.batch_id')
         ->join('sales', 'sales.id', '=', 'sale_items.sale_id')
@@ -283,15 +290,12 @@ class MainReportsController extends Controller
 
     if ($request->filled('sale_type')) {
         $st = $request->sale_type;
-
         if ($st === 'customer') {
             $costTotalQ->where(function ($qq) {
-                $qq->whereNull('sales.sale_type')
-                   ->orWhere('sales.sale_type', 'customer');
+                $qq->whereNull('sales.sale_type')->orWhere('sales.sale_type', 'customer');
             });
             $qtyTotalQ->where(function ($qq) {
-                $qq->whereNull('sales.sale_type')
-                   ->orWhere('sales.sale_type', 'customer');
+                $qq->whereNull('sales.sale_type')->orWhere('sales.sale_type', 'customer');
             });
         } else {
             $costTotalQ->where('sales.sale_type', $st);
@@ -299,54 +303,100 @@ class MainReportsController extends Controller
         }
     }
 
-    // payment filters for totals
     if ($request->filled('payment_method')) {
         $pm = $request->payment_method;
 
         $costTotalQ->whereExists(function ($q) use ($pm) {
-            $q->selectRaw('1')
-              ->from('payments')
+            $q->selectRaw('1')->from('payments')
               ->whereColumn('payments.sale_id', 'sales.id')
               ->where('payments.method', $pm);
         });
 
         $qtyTotalQ->whereExists(function ($q) use ($pm) {
-            $q->selectRaw('1')
-              ->from('payments')
+            $q->selectRaw('1')->from('payments')
               ->whereColumn('payments.sale_id', 'sales.id')
               ->where('payments.method', $pm);
         });
     }
 
     if ($request->filled('bank_id')) {
-        $bankId = (int) $request->bank_id;
+        $bankId = (int)$request->bank_id;
 
         $costTotalQ->whereExists(function ($q) use ($bankId) {
-            $q->selectRaw('1')
-              ->from('payments')
+            $q->selectRaw('1')->from('payments')
               ->whereColumn('payments.sale_id', 'sales.id')
               ->where('payments.bank_id', $bankId);
         });
 
         $qtyTotalQ->whereExists(function ($q) use ($bankId) {
-            $q->selectRaw('1')
-              ->from('payments')
+            $q->selectRaw('1')->from('payments')
               ->whereColumn('payments.sale_id', 'sales.id')
               ->where('payments.bank_id', $bankId);
         });
     }
 
-    $totals->cost_total = (float) $costTotalQ
+    $totals->cost_total = (float)$costTotalQ
         ->selectRaw('COALESCE(SUM(sale_items.quantity * COALESCE(batches.cost_price,0)),0) as cost_total')
         ->value('cost_total');
 
-    $totals->qty_total = (float) $qtyTotalQ
+    $totals->qty_total = (float)$qtyTotalQ
         ->selectRaw('COALESCE(SUM(sale_items.quantity),0) as qty_total')
         ->value('qty_total');
 
-    $profit = (float) $totals->revenue_total - (float) $totals->cost_total;
+    $profit = (float)$totals->revenue_total - (float)$totals->cost_total;
 
-    return view('panels.main.reports.sales', compact('sales', 'totals', 'profit', 'banks'));
+    /**
+     * ✅ NEW: Perfume-wise sold qty summary (same filters)
+     * We group by item_name (you store perfume name in SaleItem::item_name)
+     */
+    $perfumeQtyQ = DB::table('sale_items')
+        ->join('sales', 'sales.id', '=', 'sale_items.sale_id')
+        ->where('sales.shop_id', $shopId);
+
+    if ($request->filled('from')) $perfumeQtyQ->whereDate('sales.created_at', '>=', $request->from);
+    if ($request->filled('to'))   $perfumeQtyQ->whereDate('sales.created_at', '<=', $request->to);
+
+    if ($request->filled('status')) $perfumeQtyQ->where('sales.status', $request->status);
+    else $perfumeQtyQ->whereIn('sales.status', ['completed', 'partial_return']);
+
+    if ($request->filled('sale_type')) {
+        $st = $request->sale_type;
+        if ($st === 'customer') {
+            $perfumeQtyQ->where(function ($qq) {
+                $qq->whereNull('sales.sale_type')->orWhere('sales.sale_type', 'customer');
+            });
+        } else {
+            $perfumeQtyQ->where('sales.sale_type', $st);
+        }
+    }
+
+    if ($request->filled('payment_method')) {
+        $pm = $request->payment_method;
+        $perfumeQtyQ->whereExists(function ($q) use ($pm) {
+            $q->selectRaw('1')->from('payments')
+              ->whereColumn('payments.sale_id', 'sales.id')
+              ->where('payments.method', $pm);
+        });
+    }
+
+    if ($request->filled('bank_id')) {
+        $bankId = (int)$request->bank_id;
+        $perfumeQtyQ->whereExists(function ($q) use ($bankId) {
+            $q->selectRaw('1')->from('payments')
+              ->whereColumn('payments.sale_id', 'sales.id')
+              ->where('payments.bank_id', $bankId);
+        });
+    }
+
+    $perfumeSummary = $perfumeQtyQ
+        ->selectRaw('sale_items.item_name as name')
+        ->selectRaw('COALESCE(SUM(sale_items.quantity),0) as qty')
+        ->groupBy('sale_items.item_name')
+        ->orderByDesc('qty')
+        ->limit(50)
+        ->get();
+
+    return view('panels.main.reports.sales', compact('sales', 'totals', 'profit', 'banks', 'perfumeSummary'));
 }
 
     // public function returns(Request $request)
