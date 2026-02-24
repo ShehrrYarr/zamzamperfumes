@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Main;
 use App\Http\Controllers\Controller;
 use App\Models\Batch;
 use App\Models\Bank;
+use App\Models\Shop;
 use App\Models\Sale;
 use App\Models\SaleReturn;
 use Illuminate\Http\Request;
@@ -20,41 +21,60 @@ class MainReportsController extends Controller
     }
 
     public function batches(Request $request)
-    {
-        $this->assertMain();
+{
+    $this->assertMain();
 
-        $shopId = (int)auth()->user()->shop_id;
+    $mainShopId = (int) auth()->user()->shop_id;
 
-        $q = Batch::query()
-            ->with(['perfume', 'shop'])
-            ->where('shop_id', $shopId)
-            ->orderByDesc('id');
+    // ✅ for dropdown: main + all branches
+    $shops = Shop::query()
+        ->whereIn('type', ['main', 'branch'])
+        ->where('is_active', true)
+        ->orderByRaw("FIELD(type,'main','branch')")
+        ->orderBy('name')
+        ->get();
 
-        if ($request->filled('from')) {
-            $q->whereDate('created_at', '>=', $request->from);
-        }
-        if ($request->filled('to')) {
-            $q->whereDate('created_at', '<=', $request->to);
-        }
-        if ($request->filled('q')) {
-            $s = trim($request->q);
-            $q->where(function ($qq) use ($s) {
-                $qq->where('barcode', 'like', "%{$s}%")
-                   ->orWhere('batch_code', 'like', "%{$s}%");
-            });
-        }
+    // ✅ selected shop (default = main shop)
+    $selectedShopId = (int) ($request->input('shop_id', $mainShopId));
 
-        $totals = (clone $q)
-            ->reorder()
-            ->selectRaw('COUNT(*) as batch_count')
-            ->selectRaw('COALESCE(SUM(quantity),0) as total_qty')
-            ->selectRaw('COALESCE(SUM(quantity * COALESCE(cost_price,0)),0) as total_stock_cost')
-            ->first();
+    // ✅ security: main shop can view only main+branch shops
+    abort_if(!$shops->contains('id', $selectedShopId), 403);
 
-        $batches = $q->paginate(25)->withQueryString();
+    $q = Batch::query()
+        ->with(['perfume', 'shop'])
+        ->where('shop_id', $selectedShopId)
+        ->orderByDesc('id');
 
-        return view('panels.main.reports.batches', compact('batches', 'totals'));
+    if ($request->filled('from')) {
+        $q->whereDate('created_at', '>=', $request->from);
     }
+    if ($request->filled('to')) {
+        $q->whereDate('created_at', '<=', $request->to);
+    }
+    if ($request->filled('q')) {
+        $s = trim($request->q);
+        $q->where(function ($qq) use ($s) {
+            $qq->where('barcode', 'like', "%{$s}%")
+               ->orWhere('batch_code', 'like', "%{$s}%");
+        });
+    }
+
+    $totals = (clone $q)
+        ->reorder()
+        ->selectRaw('COUNT(*) as batch_count')
+        ->selectRaw('COALESCE(SUM(quantity),0) as total_qty')
+        ->selectRaw('COALESCE(SUM(quantity * COALESCE(cost_price,0)),0) as total_stock_cost')
+        ->first();
+
+    $batches = $q->paginate(25)->withQueryString();
+
+    return view('panels.main.reports.batches', compact(
+        'batches',
+        'totals',
+        'shops',
+        'selectedShopId'
+    ));
+}
 
  public function sales(Request $request)
 {

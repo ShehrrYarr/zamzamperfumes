@@ -18,6 +18,17 @@
             <hr>
 
             <form method="GET" class="row">
+
+                <div class="col-md-3 mb-2">
+                    <label class="mb-1"><b>Shop</b></label>
+                    <select name="shop_id" class="form-control">
+                        @foreach($shops as $s)
+                        <option value="{{ $s->id }}" @selected((int)request('shop_id', $selectedShopId)===(int)$s->id)>
+                            {{ strtoupper($s->type) }} — {{ $s->name }}
+                        </option>
+                        @endforeach
+                    </select>
+                </div>
                 <div class="col-md-3 mb-2">
                     <label class="mb-1"><b>From</b></label>
                     <input type="date" name="from" value="{{ request('from') }}" class="form-control">
@@ -113,8 +124,8 @@
                 </table>
             </div>
 
-            <div class="mt-3">
-                {{ $batches->links() }}
+            <div class="d-flex justify-content-center mt-3">
+                {{ $batches->onEachSide(1)->links('pagination::bootstrap-4') }}
             </div>
         </div>
     </div>
