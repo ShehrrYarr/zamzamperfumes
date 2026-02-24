@@ -11,20 +11,25 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
 
     <style>
+        body.modal-open {
+            overflow: hidden;
+        }
+
+
         :root {
             /* Modern SaaS: neutral base + crisp accents */
             --bg1: #f6f7fb;
             --bg2: #eef1f7;
-    
+
             --cardTop: rgba(255, 255, 255, .88);
             --cardBottom: rgba(255, 255, 255, .68);
-    
+
             --border: rgba(15, 23, 42, .10);
             --border2: rgba(15, 23, 42, .06);
-    
+
             --text: #0f172a;
             --muted: rgba(15, 23, 42, .60);
-    
+
             --accent: #2563eb;
             /* blue */
             --accent2: #7c3aed;
@@ -35,35 +40,35 @@
             /* red */
             --warn: #f59e0b;
             /* amber */
-    
+
             --radius: 18px;
             --shadow: 0 18px 45px rgba(15, 23, 42, .10);
             --shadow2: 0 10px 25px rgba(15, 23, 42, .08);
-    
+
             /* Today sales alternate */
             --todayBg1: rgba(255, 255, 255, .92);
             --todayBg2: rgba(255, 255, 255, .74);
             --todayBorder: rgba(37, 99, 235, .14);
             --todayGlow: 0 18px 45px rgba(37, 99, 235, .10);
-    
+
             /* Modal */
             --modalBg: rgba(15, 23, 42, .55);
             --panelBg: rgba(255, 255, 255, .86);
-    
+
             /* Inputs */
             --inputBg: rgba(255, 255, 255, .92);
             --inputFocus: rgba(37, 99, 235, .24);
         }
-    
+
         * {
             box-sizing: border-box;
         }
-    
+
         html,
         body {
             height: 100%;
         }
-    
+
         body {
             margin: 0;
             font-family: Roboto, system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
@@ -73,40 +78,40 @@
                 radial-gradient(900px 500px at 100% 20%, rgba(124, 58, 237, .08), transparent 55%),
                 linear-gradient(180deg, var(--bg1), var(--bg2));
         }
-    
+
         /* animations */
         .fade {
             animation: fade .35s ease-out both;
         }
-    
+
         @keyframes fade {
             from {
                 opacity: 0;
                 transform: translateY(10px);
             }
-    
+
             to {
                 opacity: 1;
                 transform: none;
             }
         }
-    
+
         @keyframes pop {
             from {
                 opacity: 0;
                 transform: scale(.985) translateY(8px);
             }
-    
+
             to {
                 opacity: 1;
                 transform: none;
             }
         }
-    
+
         .pop {
             animation: pop .22s ease-out both;
         }
-    
+
         /* topbar */
         .topbar {
             position: sticky;
@@ -116,7 +121,7 @@
             backdrop-filter: blur(12px);
             border-bottom: 1px solid var(--border);
         }
-    
+
         .topbar-inner {
             max-width: 1440px;
             margin: auto;
@@ -126,7 +131,7 @@
             align-items: center;
             gap: 12px;
         }
-    
+
         .title h1 {
             margin: 0;
             font-size: 18px;
@@ -137,14 +142,14 @@
             background-clip: text;
             color: transparent;
         }
-    
+
         .title p {
             margin: 2px 0 0;
             font-size: 12px;
             color: var(--muted);
             font-weight: 600;
         }
-    
+
         /* buttons */
         .btn {
             padding: 10px 16px;
@@ -158,61 +163,61 @@
             user-select: none;
             box-shadow: 0 8px 18px rgba(15, 23, 42, .08);
         }
-    
+
         .btn:hover {
             transform: translateY(-2px);
             box-shadow: var(--shadow2);
         }
-    
+
         .btn:active {
             transform: translateY(-1px);
         }
-    
+
         .btn:disabled {
             opacity: .55;
             cursor: not-allowed;
             transform: none;
             box-shadow: none;
         }
-    
+
         .btn-back {
             background: linear-gradient(135deg, rgba(37, 99, 235, 1), rgba(124, 58, 237, 1));
             color: #fff;
             border: none;
             box-shadow: 0 12px 28px rgba(37, 99, 235, .25);
         }
-    
+
         .btn-accent {
             background: linear-gradient(135deg, rgba(22, 163, 74, 1), rgba(34, 197, 94, 1));
             color: #fff;
             border: none;
             box-shadow: 0 12px 28px rgba(22, 163, 74, .20);
         }
-    
+
         .btn-danger {
             background: linear-gradient(135deg, rgba(220, 38, 38, 1), rgba(244, 63, 94, 1));
             color: #fff;
             border: none;
             box-shadow: 0 12px 28px rgba(220, 38, 38, .18);
         }
-    
+
         .btn-warn {
             background: linear-gradient(135deg, rgba(245, 158, 11, 1), rgba(251, 191, 36, 1));
             color: #1f2937;
             border: none;
             box-shadow: 0 12px 28px rgba(245, 158, 11, .18);
         }
-    
+
         .btn-ghost {
             background: transparent;
             border: 1px solid var(--border);
             box-shadow: none;
         }
-    
+
         .btn-ghost:hover {
             background: rgba(255, 255, 255, .75);
         }
-    
+
         /* layout */
         .content {
             max-width: 1440px;
@@ -220,13 +225,13 @@
             padding: 22px;
             width: 100%;
         }
-    
+
         .grid {
             display: grid;
             grid-template-columns: 1.3fr .7fr;
             gap: 18px;
         }
-    
+
         /* cards */
         .card {
             background: linear-gradient(180deg, var(--cardTop), var(--cardBottom));
@@ -235,7 +240,7 @@
             box-shadow: var(--shadow);
             overflow: hidden;
         }
-    
+
         .card-h {
             padding: 14px 18px;
             border-bottom: 1px solid var(--border2);
@@ -245,23 +250,23 @@
             gap: 10px;
             background: rgba(255, 255, 255, .55);
         }
-    
+
         .card-h .h {
             font-size: 15px;
             font-weight: 950;
             color: var(--text);
         }
-    
+
         .card-h .sub {
             font-size: 12px;
             color: var(--muted);
             font-weight: 650;
         }
-    
+
         .card-b {
             padding: 18px;
         }
-    
+
         /* Today Sales alternate style */
         .card-today {
             background:
@@ -270,28 +275,28 @@
             border: 1px solid var(--todayBorder);
             box-shadow: var(--todayGlow);
         }
-    
+
         .card-today .card-h {
             border-bottom: 1px solid rgba(37, 99, 235, .14);
         }
-    
+
         .card-today .btn {
             border-color: rgba(37, 99, 235, .20);
         }
-    
+
         .card-today .table-wrap {
             border-color: rgba(37, 99, 235, .16);
         }
-    
+
         .card-today th {
             color: rgba(15, 23, 42, .80);
         }
-    
+
         .card-today td,
         .card-today .small {
             color: rgba(15, 23, 42, .78);
         }
-    
+
         /* controls */
         .controls {
             display: flex;
@@ -299,7 +304,7 @@
             flex-wrap: wrap;
             align-items: center;
         }
-    
+
         .input,
         .select {
             padding: 12px 12px;
@@ -311,27 +316,27 @@
             transition: box-shadow .16s ease, border-color .16s ease, transform .16s ease;
             box-shadow: 0 6px 14px rgba(15, 23, 42, .06);
         }
-    
+
         .input {
             min-width: 260px;
         }
-    
+
         .select {
             min-width: 220px;
         }
-    
+
         .input::placeholder {
             color: rgba(15, 23, 42, .45);
             font-weight: 600;
         }
-    
+
         .input:focus,
         .select:focus {
             border-color: rgba(37, 99, 235, .35);
             box-shadow: 0 0 0 4px var(--inputFocus);
             transform: translateY(-1px);
         }
-    
+
         /* badge */
         .badge {
             display: inline-flex;
@@ -346,7 +351,7 @@
             font-weight: 800;
             box-shadow: 0 6px 14px rgba(15, 23, 42, .06);
         }
-    
+
         /* tables */
         .table-wrap {
             overflow: auto;
@@ -354,20 +359,20 @@
             border-radius: 14px;
             background: rgba(255, 255, 255, .70);
         }
-    
+
         table {
             width: 100%;
             border-collapse: collapse;
             min-width: 720px;
         }
-    
+
         th,
         td {
             padding: 11px 10px;
             border-bottom: 1px solid rgba(15, 23, 42, .06);
             text-align: left;
         }
-    
+
         th {
             font-size: 12px;
             color: rgba(15, 23, 42, .72);
@@ -378,32 +383,32 @@
             top: 0;
             z-index: 1;
         }
-    
+
         td {
             font-size: 13px;
             color: rgba(15, 23, 42, .88);
         }
-    
+
         tr:hover td {
             background: rgba(37, 99, 235, .045);
         }
-    
+
         .small {
             font-size: 12px;
             color: rgba(15, 23, 42, .55);
             font-weight: 650;
         }
-    
+
         .right {
             text-align: right;
         }
-    
+
         hr.sep {
             border: none;
             border-top: 1px solid rgba(15, 23, 42, .08);
             margin: 12px 0;
         }
-    
+
         /* KPI */
         .kpi {
             display: flex;
@@ -411,7 +416,7 @@
             gap: 12px;
             flex-wrap: wrap;
         }
-    
+
         .kpi .box {
             flex: 1;
             min-width: 160px;
@@ -421,32 +426,32 @@
             background: rgba(255, 255, 255, .70);
             box-shadow: 0 10px 24px rgba(15, 23, 42, .06);
         }
-    
+
         .kpi .box .v {
             font-weight: 950;
             font-size: 18px;
             color: var(--text);
         }
-    
+
         .kpi .box .t {
             font-size: 12px;
             color: rgba(15, 23, 42, .55);
             font-weight: 750;
         }
-    
+
         /* form grid */
         .form-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 10px;
         }
-    
+
         @media(max-width:520px) {
             .form-grid {
                 grid-template-columns: 1fr;
             }
         }
-    
+
         /* radio rows */
         .radio-row {
             display: flex;
@@ -459,7 +464,7 @@
             background: rgba(255, 255, 255, .70);
             box-shadow: 0 10px 24px rgba(15, 23, 42, .06);
         }
-    
+
         .radio-row label {
             display: flex;
             align-items: center;
@@ -469,11 +474,11 @@
             font-size: 13px;
             cursor: pointer;
         }
-    
+
         .radio-row input {
             transform: translateY(1px);
         }
-    
+
         /* totals */
         .totals {
             border: 1px solid var(--border);
@@ -482,30 +487,30 @@
             background: rgba(255, 255, 255, .72);
             box-shadow: 0 10px 24px rgba(15, 23, 42, .06);
         }
-    
+
         .totals .row {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 6px 0;
         }
-    
+
         .totals .row strong {
             font-size: 14px;
             font-weight: 950;
             color: var(--text);
         }
-    
+
         .totals .grand {
             border-top: 1px solid rgba(15, 23, 42, .08);
             margin-top: 8px;
             padding-top: 10px;
         }
-    
+
         .totals .grand strong {
             font-size: 16px;
         }
-    
+
         /* toast */
         .toast {
             margin-top: 12px;
@@ -518,7 +523,7 @@
             font-weight: 800;
             box-shadow: 0 10px 24px rgba(15, 23, 42, .08);
         }
-    
+
         /* Modal */
         .modal {
             position: fixed;
@@ -528,11 +533,11 @@
             display: none;
             z-index: 1000;
         }
-    
+
         .modal.show {
             display: flex;
         }
-    
+
         .modal-inner {
             width: min(980px, calc(100% - 26px));
             margin: auto;
@@ -543,9 +548,25 @@
                 radial-gradient(800px 300px at 100% 0%, rgba(124, 58, 237, .08), transparent),
                 linear-gradient(180deg, rgba(255, 255, 255, .92), rgba(255, 255, 255, .74));
             box-shadow: 0 40px 120px rgba(15, 23, 42, .30);
+
             overflow: hidden;
+            /* keep rounded corners */
+            display: flex;
+            /* header fixed + body scroll */
+            flex-direction: column;
+            max-height: min(92vh, 860px);
+            /* prevent going beyond screen */
         }
-    
+
+        .modal-b {
+            padding: 18px;
+            overflow: auto;
+            /* ✅ scroll here */
+            -webkit-overflow-scrolling: touch;
+            flex: 1;
+            /* take remaining height */
+        }
+
         .modal-h {
             padding: 14px 18px;
             border-bottom: 1px solid rgba(15, 23, 42, .10);
@@ -555,16 +576,13 @@
             gap: 10px;
             background: rgba(255, 255, 255, .65);
         }
-    
+
         .modal-h .h {
             font-weight: 950;
             color: var(--text);
         }
-    
-        .modal-b {
-            padding: 18px;
-        }
-    
+
+
         .modal-close {
             border: 1px solid var(--border);
             background: rgba(255, 255, 255, .85);
@@ -576,24 +594,24 @@
             transition: .18s ease;
             box-shadow: 0 10px 24px rgba(15, 23, 42, .08);
         }
-    
+
         .modal-close:hover {
             transform: translateY(-1px);
         }
-    
+
         .modal-kpi {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
             gap: 10px;
             margin-top: 10px;
         }
-    
+
         @media(max-width:860px) {
             .modal-kpi {
                 grid-template-columns: 1fr;
             }
         }
-    
+
         .pill {
             display: inline-flex;
             gap: 8px;
@@ -607,12 +625,12 @@
             color: rgba(15, 23, 42, .90);
             box-shadow: 0 10px 24px rgba(15, 23, 42, .06);
         }
-    
+
         .pill span {
             color: rgba(15, 23, 42, .60);
             font-weight: 900;
         }
-    
+
         .helper {
             border: 1px solid rgba(245, 158, 11, .25);
             background: rgba(245, 158, 11, .10);
@@ -623,12 +641,12 @@
             font-weight: 750;
             box-shadow: 0 10px 24px rgba(15, 23, 42, .06);
         }
-    
+
         @media(max-width:980px) {
             .grid {
                 grid-template-columns: 1fr;
             }
-    
+
             table {
                 min-width: 640px;
             }
@@ -769,15 +787,15 @@
                         {{-- Cart Table --}}
                         <div class="table-wrap">
                             <table style="min-width:560px;">
-                               <thead>
-                                <tr>
-                                    <th>Item</th>
-                                    <th>Qty</th>
-                                    <th class="right">Unit Price</th>
-                                    <th class="right">Subtotal</th>
-                                    <th class="right">Action</th>
-                                </tr>
-                            </thead>
+                                <thead>
+                                    <tr>
+                                        <th>Item</th>
+                                        <th>Qty</th>
+                                        <th class="right">Unit Price</th>
+                                        <th class="right">Subtotal</th>
+                                        <th class="right">Action</th>
+                                    </tr>
+                                </thead>
                                 <tbody id="cartBody">
                                     <tr>
                                         <td colspan="5" class="small">Cart is empty.</td>
@@ -1408,6 +1426,7 @@
   ------------------------ */
 
   function openModal(){
+    document.body.classList.add('modal-open');
     returnStatus.textContent = '';
     saleMeta.style.display = 'none';
     returnItemsBody.innerHTML = `<tr><td colspan="8" class="small">Fetch a sale first.</td></tr>`;
@@ -1423,6 +1442,7 @@
   function closeModal(){
     returnModal.classList.remove('show');
     returnModal.setAttribute('aria-hidden','true');
+    document.body.classList.remove('modal-open');
     barcodeInput.focus();
   }
 

@@ -99,8 +99,8 @@
                 </table>
             </div>
 
-            <div class="mt-3">
-                {{ $items->links() }}
+            <div class="d-flex justify-content-center mt-3">
+                {{ $items->onEachSide(1)->links('pagination::bootstrap-4') }}
             </div>
         </div>
     </div>
